@@ -1,16 +1,31 @@
 {
   "files": {
-    "main.css": "/crm/static/css/main.073c9b0a.css",
-    "main.js": "/crm/static/js/main.2dfb4f37.js",
+    "main.css": "/crm/static/css/main.3a8610e0.css",
+    "main.js": "/crm/static/js/main.173db605.js",
     "static/js/787.920d0757.chunk.js": "/crm/static/js/787.920d0757.chunk.js",
-    "static/media/logo.svg": "/crm/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "static/media/placeHolderAuthBg.png": "/crm/static/media/placeHolderAuthBg.55688dc57d50c6795996.png",
+    "static/media/community-4.png": "/crm/static/media/community-4.ab6585b5b1d4d7f672aa.png",
+    "static/media/emojiLady2.png": "/crm/static/media/emojiLady2.1108e4772a0328f69d02.png",
+    "static/media/family.svg": "/crm/static/media/family.b7e38065eefe0f03ab0a802a1ab25c53.svg",
+    "static/media/health.svg": "/crm/static/media/health.2b278351ba7cc277c18b72f9fbbb8bd7.svg",
+    "static/media/music.svg": "/crm/static/media/music.09538903bf81c57008a298b133aa7086.svg",
+    "static/media/travel.svg": "/crm/static/media/travel.53cbb372b109c57d6d1e625410b5d3ac.svg",
+    "static/media/googleIcon.svg": "/crm/static/media/googleIcon.1386e99c51443f3431b457213faee5df.svg",
+    "static/media/visibility-off.svg": "/crm/static/media/visibility-off.ca07ae92bdea4130f88c0c129b6af9ea.svg",
+    "static/media/facebookIcon.svg": "/crm/static/media/facebookIcon.3c7b501a72282bcb7cb55aafe7b4ac38.svg",
+    "static/media/automobile.svg": "/crm/static/media/automobile.52a0f28f9e9952adca761685625e93e2.svg",
     "index.html": "/crm/index.html",
-    "main.073c9b0a.css.map": "/crm/static/css/main.073c9b0a.css.map",
-    "main.2dfb4f37.js.map": "/crm/static/js/main.2dfb4f37.js.map",
+    "static/media/business.svg": "/crm/static/media/business.90f4410fc45b4e5cc0966732615a1dac.svg",
+    "static/media/finance.svg": "/crm/static/media/finance.b07cee54ae7ad72275d0865b6ac55359.svg",
+    "static/media/food.svg": "/crm/static/media/food.20c190f302b3e97839f38515ed6204ff.svg",
+    "static/media/education.svg": "/crm/static/media/education.a2c6e718940662fc4378f2e9574a566f.svg",
+    "static/media/technology.svg": "/crm/static/media/technology.0e2a87b35282fe28fa89ee886c17ce4a.svg",
+    "main.3a8610e0.css.map": "/crm/static/css/main.3a8610e0.css.map",
+    "main.173db605.js.map": "/crm/static/js/main.173db605.js.map",
     "787.920d0757.chunk.js.map": "/crm/static/js/787.920d0757.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.073c9b0a.css",
-    "static/js/main.2dfb4f37.js"
+    "static/css/main.3a8610e0.css",
+    "static/js/main.173db605.js"
   ]
 }
