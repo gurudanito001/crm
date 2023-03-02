@@ -1,6 +1,5 @@
 {
   "name": "crm",
-  "homepage": "http://gurudanito001.github.io/crm",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
