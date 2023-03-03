@@ -16,8 +16,8 @@ const Layout = ({children}) =>{
             </div>
           </div>
           <div className="row">
-            <div className="col px-0 px-lg-3 pt-lg-3" >
-              <div className="bg-white rounded pb-5 mainContent"/*  style={{height: "calc(100vh - 85px)", overflow: "auto"}} */>
+            <div className="col px-0 px-lg-3 pt-lg-3">
+              <div className="bg-white rounded pb-5 mainContent" >
                 {children}
               </div>
             </div>

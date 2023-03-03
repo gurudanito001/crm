@@ -44,7 +44,7 @@ const SideBar = () =>{
         <Fragment>
           <i className="bi bi-person-circle fs-1"></i> 
           <div className="ms-3">
-            <span className="fs-6">Daniel Nwokocha</span><br />
+            <span className="fs-6">Firstname Lastname</span><br />
             <span className="small text-secondary">Administrator</span>
           </div>
         </Fragment>}
