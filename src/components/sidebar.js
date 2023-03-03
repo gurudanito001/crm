@@ -53,7 +53,7 @@ const SideBar = () =>{
         </button>
         
       </header>
-      <ul style={{height: "calc(100vh - 81px)", overflow: "auto"}}>
+      <ul className="pb-5" style={{height: "calc(100vh - 81px)", overflow: "auto"}}>
         <ListItem title="Dashboard" link="/app/dashboard" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-bar-chart-line-fill" />
         <ListItem title="Companies" link="/app/company" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-building" />
         <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-person" />

@@ -17,27 +17,23 @@ import { useNavigate } from "react-router-dom";
 
 
 
-type cardProps = {
-  img: string,
-  title: string
-}
+
 const styles = {
   cardContainer: {
     maxWidth: "800px",
-    margin: "80px auto",
     border: "1px solid white"
   },
   card: {
     width: "160px",
     height: "132px",
     borderRadius: "20px",
-    boxShadow: "1px 5px 5px 7px rgba(83,133,6,0.18)"
+    boxShadow: "1px 5px 5px 7px #c586fc11 "/*  #840cee */
   }
 
 }
-const DashboardCard = ({ img, title }: cardProps) => {
+const DashboardCard = ({ amount, title }) => {
   return <figure style={styles.card} className="d-inline-flex flex-column mx-auto my-4 align-items-center">
-    <img className="mt-auto" src={img} />
+    <span className="fs-2 mt-auto fw-bold">{amount}</span>
     <figcaption className="mb-auto mt-3">{title}</figcaption>
   </figure>
 }
@@ -46,26 +42,19 @@ const DashboardCard = ({ img, title }: cardProps) => {
 const Dashboard = () => {
   return (
     <Layout>
-      <main style={styles.cardContainer}>
-        <h2 className="text-center">What would you like to see?</h2>
-        <p className="text-center mt-3 mb-4">Select the type of content you would like to see on your profile.</p>
+      <main style={styles.cardContainer} className="py-5 mx-auto">
 
         <div className="d-flex flex-wrap">
-          <DashboardCard img={Music} title="Music" />
-          <DashboardCard img={Health} title="Health & Fitness" />
-          <DashboardCard img={Family} title="Family" />
-          <DashboardCard img={Travel} title="Travel" />
-          <DashboardCard img={Technology} title="Technology" />
-          <DashboardCard img={Food} title="Food" />
-          <DashboardCard img={Education} title="Education" />
-          <DashboardCard img={Travel} title="Travel" />
-          <DashboardCard img={Automobile} title="Automobile" />
-          <DashboardCard img={Business} title="Business" />
-          <DashboardCard img={Finance} title="Finance" />
-          <DashboardCard img={Travel} title="Travel" />
+          <DashboardCard amount={25} title="Total Customers" />
+          <DashboardCard amount={25} title="Total Visits" />
+          <DashboardCard amount={25} title="Total Visit Reports" />
+          <DashboardCard amount={25} title="Total Companies" />
+          <DashboardCard amount={25} title="Total Invoice Requests" />
+          <DashboardCard amount={25} title="Total Products" />
+          <DashboardCard amount={25} title="Total Payments" />
+          <DashboardCard amount={25} title="Total Employees" />
         </div>
 
-        <button className="btn btnGreen w-100 d-flex align-items-center justify-content-center mt-5">Continue &rarr;</button>
       </main>
 
     </Layout>

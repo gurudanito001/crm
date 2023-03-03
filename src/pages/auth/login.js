@@ -16,8 +16,7 @@ const Login = () => {
       <div className="container-fluid" style={{ height: "100vh"}}>
         <div className="row h-100">
           <div className="col-12 col-lg px-3 px-md-3 d-flex flex-column">
-            <Nav />
-            <section className="formContainer mx-auto mt-5 border rounded p-5">
+            <section className="formContainer mx-auto my-auto bg-white border rounded p-5">
               <header className="h3 fw-bold">Log In</header>
               <p>Log in with your credentials.</p>
               <form className="mt-5">
@@ -30,20 +29,20 @@ const Login = () => {
                   <label htmlFor="password" className="form-label">Password</label>
                   <div className="input-group">
                     <input type="password" className="form-control shadow-none border-end-0" id="password" placeholder="Set an 8-character password" />
-                    <span className="input-group-text bg-white border-start-0" id="basic-addon1"><img width="20px" src={VisibilityOff} /></span>
+                    <span className="input-group-text bg-white border-start-0" id="basic-addon1"><img width="20px" src={VisibilityOff} alt="Visibility Toggle Icon" /></span>
                   </div>
                 </div>
 
                 <div className="form-check mt-4 d-flex align-items-center">
                   <div>
                     <input className="form-check-input" type="checkbox" value="" id="checkbox" />
-                    <label className="form-check-label" htmlFor="checkbox">
-                      <a className="textGreen">Remember Me</a>
+                    <label className="form-check-label textPurple" htmlFor="checkbox">
+                      Remember Me
                     </label>
                   </div>
-                  <a href="/forgotPassword" className="textGreen ms-auto">Forgot Password?</a>
+                  <a href="/forgotPassword" className="textPurple ms-auto">Forgot Password?</a>
                 </div>
-                <button className="btn btnGreen w-100 mt-5">Log In</button>
+                <button className="btn btnPurple w-100 mt-5">Log In</button>
               </form>
             </section>
           </div>

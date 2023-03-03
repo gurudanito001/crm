@@ -2,11 +2,8 @@ import SideBar from "./sidebar"
 import InsideNav from "./insideNav"
 import React from "react"
 
-type props = {
-  children: React.ReactNode
-}
 
-const Layout = ({children}: props) =>{
+const Layout = ({children}) =>{
 
   return (
     <div className="container-fluid" style={{height: "100vh"}}>
@@ -25,7 +22,7 @@ const Layout = ({children}: props) =>{
               </div>
             </div>
             <div className="col-lg-auto d-none d-lg-block px-lg-0 pt-lg-3" >
-              <aside className="bg-white border h-100 rounded" style={{minWidth: "350px"}}>werwrwe
+              <aside className="bg-white border h-100 rounded" style={{minWidth: "350px"}}>
               </aside>
             </div>
           </div>

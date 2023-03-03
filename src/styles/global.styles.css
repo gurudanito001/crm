@@ -157,6 +157,9 @@ input[type=file]::file-selector-button:hover {
 .bgPurple{
   background-color: #9733EE;
 }
+.textPurple{
+  color: #840cee ;
+}
 .bgGreenDark{
   background-color: #4C7903;
 }
@@ -170,7 +173,7 @@ input[type=file]::file-selector-button:hover {
 
 @media screen and (min-width: 1000px) {
   .mainContent{
-    height: calc(100vh - 85px);
+    height: calc(100vh - 99px);
     overflow: auto;
   }
 }

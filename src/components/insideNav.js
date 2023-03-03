@@ -35,12 +35,11 @@ const InsideNav = () => {
           <i className="bi bi-bell fs-5 px-2 border-end"></i>
           <div className="dropdown">
             <button className="btn btn-link text-dark dropdown-toggle px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img width="25px" src={ProfilePic} />
+              <img width="25px" src={ProfilePic} alt="Profile" />
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
-              <li><a className="dropdown-item" href="#">Action</a></li>
-              <li><a className="dropdown-item" href="#">Another action</a></li>
-              <li><a className="dropdown-item" href="#">Something else here</a></li>
+              <li><button className="dropdown-item" href="#">View Profile</button></li>
+              <li><button className="dropdown-item" href="#">Logout</button></li>
             </ul>
           </div>
         </div>
