@@ -1,14 +1,12 @@
-import Nav from "../../components/nav";
 import VisibilityOff from "../../images/visibility-off.svg";
-import FacebookIcon from "../../images/facebookIcon.svg";
-import GoogleIcon from "../../images/googleIcon.svg";
 import EmojiLady2 from "../../images/emojiLady2.png"
 import '../../styles/auth.styles.css';
 import NotificationModal from "../../components/notificationModal";
 import { useState } from "react";
-import PlaceHolderBg from "../../images/placeHolderAuthBg.png";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
 
   return (
@@ -42,7 +40,7 @@ const Login = () => {
                   </div>
                   <a href="/forgotPassword" className="textPurple ms-auto">Forgot Password?</a>
                 </div>
-                <button className="btn btnPurple w-100 mt-5">Log In</button>
+                <button className="btn btnPurple w-100 mt-5" onClick={()=>navigate("/app/dashboard")}>Log In</button>
               </form>
             </section>
           </div>
