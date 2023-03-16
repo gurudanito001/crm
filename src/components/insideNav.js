@@ -1,18 +1,27 @@
 import ProfilePic from "../images/profile-pic.png"
 import { ListItem } from "./sidebar";
 import { useLocation } from "react-router-dom";
+import { logout } from "../store/slices/userSlice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const InsideNav = () => {
   const location = useLocation();
+  let dispatch = useDispatch();
+  const navigate = useNavigate();
 
   return (
     <nav className="navbar bg-white py-3" style={{ height: "80px" }}>
       <div className="container-fluid d-flex px-0 px-lg-3">
         <div className="d-flex align-items-center">
           <div className="dropdown">
-            <button className="btn btn-link dropdown-toggle sidebarDropdown shadow-none text-dark" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false"><i className={`bi bi-list fs-4 d-lg-none`}></i></button>
+            <button className="btn btn-link dropdown-toggle sidebarDropdown shadow-none text-dark d-lg-none" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false"><i className={`bi bi-list fs-4 `}></i></button>
             <ul className="dropdown-menu border pb-5" aria-labelledby="dropdownMenuLink" style={{ minWidth: "300px", marginTop: "18px", height: "calc(100vh - 150px)", overflow: "auto" }}>
               <ListItem title="Dashboard" link="/app/dashboard" pathname={location.pathname} active={false} icon="bi-bar-chart-line-fill" />
+              <ListItem title="States" link="/app/state" pathname={location.pathname} active={false}  icon="bi-globe-europe-africa" />
+              <ListItem title="Branches" link="/app/branch" pathname={location.pathname} active={false} icon="bi-house-fill" />
+              <ListItem title="Local Govt Areas" link="/app/lga" pathname={location.pathname} active={false} icon="bi-pin-map-fill" />
+
               <ListItem title="Companies" link="/app/company" pathname={location.pathname} active={false} icon="bi-building" />
               <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} icon="bi-person-circle" />
               <ListItem title="Customers" link="/app/customer" pathname={location.pathname} active={false} icon="bi-buildings" />
@@ -39,7 +48,10 @@ const InsideNav = () => {
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
               <li><button className="dropdown-item" href="#">View Profile</button></li>
-              <li><button className="dropdown-item" href="#">Logout</button></li>
+              <li><button className="dropdown-item" href="#" onClick={()=>{
+                dispatch(logout())
+                navigate("/login")
+                }}>Logout</button></li>
             </ul>
           </div>
         </div>

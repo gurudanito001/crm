@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/app/dashboard/dashboard';
 import Login from './pages/auth/login';
 import VerifyEmail from './pages/auth/verifyEmail';
@@ -10,10 +10,18 @@ import AddCompany from './pages/app/company/addCompany';
 import AllCompanies from './pages/app/company/allCompanies';
 import CompanyDetails from './pages/app/company/companyDetails';
 
+import AddState from './pages/app/state/addState';
+import AllStates from './pages/app/state/allStates';
+
+import AddBranch from './pages/app/branch/addBranch';
+import AllBranches from './pages/app/branch/allBranches';
+
+import AddLga from './pages/app/lga/addLga';
+import AllLgas from './pages/app/lga/allLgas';
+
 import AddEmployee from './pages/app/employee/addEmployee';
 import AllEmployees from './pages/app/employee/allEmployees';
 import EmployeeDetails from './pages/app/employee/employeeDetails';
-
 
 import AddCustomer from './pages/app/customer/addCustomer';
 import AllCustomers from './pages/app/customer/allCustomers';
@@ -22,6 +30,9 @@ import CustomerDetails from './pages/app/customer/customerDetails';
 import AddCustomerVisit from './pages/app/customerVisit/addCustomerVisit';
 import AllCustomerVisits from './pages/app/customerVisit/allCustomerVisits';
 import CustomerVisitDetails from './pages/app/customerVisit/customerVisitDetails';
+
+import AddProductGroup from './pages/app/productGroup/addProductGroup';
+import AllProductGroups from './pages/app/productGroup/allProductGroups';
 
 import AddProduct from './pages/app/product/addProduct';
 import AllProducts from './pages/app/product/allProducts';
@@ -66,7 +77,16 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/app/dashboard" element={<Dashboard />} />
 
-          <Route path="/app/company/" element={<AllCompanies />} />
+          <Route path="/app/state" element={<AllStates />} />
+          <Route path="/app/state/add" element={<AddState />} />
+
+          <Route path="/app/lga" element={<AllLgas />} />
+          <Route path="/app/lga/add" element={<AddLga />} />
+
+          <Route path="/app/branch" element={<AllBranches />} />
+          <Route path="/app/branch/add" element={<AddBranch />} />
+
+          <Route path="/app/company" element={<AllCompanies />} />
           <Route path="/app/company/add" element={<AddCompany />} />
           <Route path="/app/company/:id" element={<CompanyDetails />} />
 
@@ -81,6 +101,9 @@ function App() {
           <Route path="/app/visit/" element={<AllCustomerVisits />} />
           <Route path="/app/visit/add" element={<AddCustomerVisit />} />
           <Route path="/app/visit/:id" element={<CustomerVisitDetails />} />
+
+          <Route path="/app/prodGroup" element={<AllProductGroups />} />
+          <Route path="/app/prodGroup/add" element={<AddProductGroup />} />
 
           <Route path="/app/product/" element={<AllProducts />} />
           <Route path="/app/product/add" element={<AddProduct />} />
