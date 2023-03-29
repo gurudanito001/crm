@@ -12,7 +12,7 @@ const MarkettingActivityListItem = ({id, name, date, location, completeData }) =
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/markettingActivity/${id}`, {state: {...completeData}})}>
       <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-calendar-check text-white fs-5"></i></span>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-rocket-takeoff text-white fs-5"></i></span>
         <article>
           <span className='h6 fw-bold'>{name}</span> <br />
           <span>{location}</span>
@@ -74,6 +74,12 @@ const AllMarkettingActivities = () => {
 
         <ul className='mt-5'>
           {!markettingActivityQuery.isLoading && !markettingActivityQuery.isError  && listMarkettingActivities()}
+
+          {!markettingActivityQuery.isLoading && !markettingActivityQuery.isError && markettingActivityQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+            <p className='h6 fw-bold'>No Marketting Activity was found !!</p>
+            <span className='text-info'>Click the [+Add] button to add a new Marketting Activity</span>
+          </div>}
         </ul>
       </section>
     </Layout>

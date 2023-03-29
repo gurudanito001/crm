@@ -15,7 +15,7 @@ const PaymentListItem = ({id, nameOfCustomer, customerAddress, advancePaymentRec
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/payment/${id}`)}>
       <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-calendar-check text-white fs-5"></i></span>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-cash text-white fs-5"></i></span>
         <article>
           <span className='h6 fw-bold'>{nameOfCustomer}</span> <br />
           <span>{customerAddress}</span>
@@ -60,6 +60,7 @@ const AllPayments = () => {
 
         <ul className='mt-5'>
           {!paymentQuery.isLoading && !paymentQuery.isError && listAllPayments()}
+          
           {!paymentQuery.isLoading && !paymentQuery.isError && paymentQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Payment was found !!</p>
               <span className='text-info'>Click the [+Add] button to add a new payment</span>

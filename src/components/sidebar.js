@@ -57,13 +57,11 @@ const SideBar = () =>{
       </header>
       <ul className="pb-5" style={{height: "calc(100vh - 81px)", overflow: "auto"}}>
         <ListItem title="Dashboard" link="/app/dashboard" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-bar-chart-line-fill" />
-        <ListItem title="States" link="/app/state" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-globe-europe-africa" />
-        <ListItem title="Local Govt Areas" link="/app/lga" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-pin-map-fill" />
-        
-        
+        {/* <ListItem title="States" link="/app/state" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-globe-europe-africa" />
+        <ListItem title="Local Govt Areas" link="/app/lga" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-pin-map-fill" /> */}
         <ListItem title="Companies" link="/app/company" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-building" />
         <ListItem title="Branches" link="/app/branch" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-house-fill" />
-        <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-person" />
+        <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-file-person-fill" />
         <ListItem title="Customers" link="/app/customer" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-buildings" />
         <ListItem title="Product Groups" link="/app/prodGroup" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-diagram-3-fill" />
         <ListItem title="Products" link="/app/product" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-car-front" />

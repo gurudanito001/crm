@@ -14,7 +14,7 @@ const VehicleDeliveryListItem = ({id, customerName, customerAddress, quantityDel
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/delivery/${id}`)}>
       <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-car-front text-white fs-5"></i></span>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-truck-flatbed text-white fs-5"></i></span>
         <article>
           <span className='h6 fw-bold'>{customerName}</span> <br />
           <span>{customerAddress}</span>
@@ -61,6 +61,12 @@ const AllVehicleDeliveries = () => {
 
         <ul className='mt-5'>
         {!vehicleDeliveryQuery.isLoading && !vehicleDeliveryQuery.isError && listVehicleDeliveries()}
+
+        {!vehicleDeliveryQuery.isLoading && !vehicleDeliveryQuery.isError && vehicleDeliveryQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Vehicle Delivery was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new Vehicle Delivery</span>
+          </div>}
         </ul>
       </section>
     </Layout>

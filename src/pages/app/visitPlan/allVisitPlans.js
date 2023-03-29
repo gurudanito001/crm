@@ -65,6 +65,11 @@ const AllVisitPlans = () => {
 
         <ul className='mt-5'>
         {!visitPlanQuery.isLoading && !visitPlanQuery.isError && listAllVisitPlans()}
+
+        {!visitPlanQuery.isLoading && !visitPlanQuery.isError && visitPlanQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Visit Plan was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new visit plan</span>
+          </div>}
         </ul>
       </section>
     </Layout>

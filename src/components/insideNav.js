@@ -18,9 +18,9 @@ const InsideNav = () => {
             <button className="btn btn-link dropdown-toggle sidebarDropdown shadow-none text-dark d-lg-none" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false"><i className={`bi bi-list fs-4 `}></i></button>
             <ul className="dropdown-menu border pb-5" aria-labelledby="dropdownMenuLink" style={{ minWidth: "300px", marginTop: "18px", height: "calc(100vh - 150px)", overflow: "auto" }}>
               <ListItem title="Dashboard" link="/app/dashboard" pathname={location.pathname} active={false} icon="bi-bar-chart-line-fill" />
-              <ListItem title="States" link="/app/state" pathname={location.pathname} active={false}  icon="bi-globe-europe-africa" />
+              {/* <ListItem title="States" link="/app/state" pathname={location.pathname} active={false}  icon="bi-globe-europe-africa" /> */}
               <ListItem title="Branches" link="/app/branch" pathname={location.pathname} active={false} icon="bi-house-fill" />
-              <ListItem title="Local Govt Areas" link="/app/lga" pathname={location.pathname} active={false} icon="bi-pin-map-fill" />
+              {/* <ListItem title="Local Govt Areas" link="/app/lga" pathname={location.pathname} active={false} icon="bi-pin-map-fill" /> */}
 
               <ListItem title="Companies" link="/app/company" pathname={location.pathname} active={false} icon="bi-building" />
               <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} icon="bi-person-circle" />

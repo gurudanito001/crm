@@ -61,7 +61,10 @@ const AllEmployees = () => {
         </div>}
         <ul className='mt-5'>
           {!employeeQuery.isLoading && !employeeQuery.isError && listAllEmployees()}
-          {!employeeQuery.isLoading && !employeeQuery.isError && employeeQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
+
+          
+          {!employeeQuery.isLoading && !employeeQuery.isError && employeeQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Employee was found !!</p>
               <span className='text-info'>Click the [+Add] button to add a new employee</span>
           </div>}

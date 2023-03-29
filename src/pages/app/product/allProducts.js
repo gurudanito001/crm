@@ -61,6 +61,12 @@ const AllProducts = () => {
 
         <ul className='mt-5'>
           {!productQuery.isLoading && !productQuery.isError && listAllProducts()}
+
+          {!productQuery.isLoading && !productQuery.isError && productQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Product was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new Product</span>
+          </div>}
         </ul>
       </section>
     </Layout>

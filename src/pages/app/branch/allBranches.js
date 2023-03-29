@@ -57,6 +57,12 @@ const AllBranches = () => {
         </div>}
         <ul className='mt-5'>
           {!branchQuery.isLoading && !branchQuery.isError && listAllBranches()}
+
+          {!branchQuery.isLoading && !branchQuery.isError && branchQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Branch was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new branch</span>
+          </div>}
         </ul>
       </section>
     </Layout>

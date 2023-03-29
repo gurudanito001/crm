@@ -13,7 +13,7 @@ const PfiRequestListItem = ({id,companyName, contactPerson, productBrand, vehicl
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/pfiRequest/${id}`)}>
       <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-car-front text-white fs-5"></i></span>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-receipt text-white fs-5"></i></span>
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{companyName}</span>
           <span>{contactPerson}</span>
@@ -67,6 +67,12 @@ const AllPfiRequests = () => {
 
         <ul className='mt-5'>
           {!pfiRequestQuery.isLoading && listPfiRequests()}
+
+          {!pfiRequestQuery.isLoading && !pfiRequestQuery.isError && pfiRequestQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No PFI Request was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new PFI Request</span>
+          </div>}
         </ul>
       </section>
     </Layout>

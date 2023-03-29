@@ -94,6 +94,12 @@ const AllCustomerVisits = () => {
         <ul className='mt-5'>
           {currentTab === "scheduled" && <>{listCustomerVisits("scheduled")}</>}
           {currentTab === "reported" && <>{listCustomerVisits("reported")}</>}
+
+          {!customerVisitQuery.isLoading && !customerVisitQuery.isError && customerVisitQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Customer Visit was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new Customer Visit</span>
+          </div>}
         </ul>
       </section>
     </Layout>

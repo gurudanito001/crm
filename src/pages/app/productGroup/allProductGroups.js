@@ -58,6 +58,12 @@ const AllProductGroups = () => {
         </div>}
         <ul className='mt-5'>
           {!productGroupQuery.isLoading && !productGroupQuery.isError && listAllProductGroups()}
+
+          {!productGroupQuery.isLoading && !productGroupQuery.isError && productGroupQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Product Group was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new Product Group</span>
+          </div>}
         </ul>
       </section>
     </Layout>

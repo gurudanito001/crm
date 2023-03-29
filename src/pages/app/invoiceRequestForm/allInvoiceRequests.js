@@ -14,7 +14,7 @@ const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, v
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/invoiceRequest/${id}`)}>
       <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-car-front text-white fs-5"></i></span>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-receipt-cutoff text-white fs-5"></i></span>
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{invoiceName}</span>
           <span>{contactPerson}</span>
@@ -69,6 +69,12 @@ const AllInvoiceRequests = () => {
         <ul className='mt-5'>
         <ul className='mt-5'>
           {!invoiceRequestQuery.isLoading && listInvoiceRequests()}
+
+          {!invoiceRequestQuery.isLoading && !invoiceRequestQuery.isError && invoiceRequestQuery?.data?.length === 0 && 
+          <div className='bg-light rounded border border-secondary p-5'>
+            <p className='h6 fw-bold'>No Invoice Request was found !!</p>
+            <span className='text-info'>Click the [+Add] button to add a new invoice request</span>
+          </div>}
         </ul>
         </ul>
       </section>
