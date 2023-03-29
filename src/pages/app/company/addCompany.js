@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { apiPost, apiGet } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import Compress from "react-image-file-resizer";
+import { Spinner } from '../../../components/spinner';
 
 
 const AddCompany = () => {
@@ -31,8 +32,9 @@ const AddCompany = () => {
     logo: "",
     email: "",
     address: "",
+    brands:[],
     extraData: {
-      brands:[]
+      emptyData: "Just a random data"
     }
   });
 
@@ -41,15 +43,18 @@ const AddCompany = () => {
   const [ base64Image, setBase64Image ] = useState("");
 
   useEffect(()=>{
-    if(formData.logo && formData.logoFileName){
-      companyMutation.mutate()
+    if(base64Image){
+      setFormData( prevState => ({
+        ...prevState,
+        logo: base64Image
+      }))
     }
-  }, [formData])
+  }, [base64Image])
 
   const listBrands = () =>{
     return productGroupQuery.data.map(productGroup =>
       <div className="form-check" key={productGroup.id}>
-        <input className="form-check-input" type="checkbox" onChange={handleCheck(productGroup.name)} value={productGroup.id} id={productGroup.id} />
+        <input className="form-check-input" type="checkbox" checked={isChecked(productGroup.name)} onChange={handleCheck(productGroup.name)} value={productGroup.id} id={productGroup.id} />
         <label className="form-check-label fw-bold" htmlFor={productGroup.id}>
           {productGroup.name}
         </label>
@@ -87,43 +92,29 @@ const AddCompany = () => {
         }
       })
       let state = formData;
-      state.extraData.brands.push(brandData);
+      state.brands.push(brandData);
       setFormData(prevState =>({
         ...prevState,
         ...state
       }))
     }else{
-      /* let brandData;
-      productGroupQuery.data.forEach( item =>{
-        if(item.name === brand){
-          brandData = item;
-        }
-      }) */
       let state = formData;
-      state.extraData.brands = state.extraData.brands.filter( function(item){ return item.name !== brand })
+      state.brands = state.brands.filter( function(item){ return item.name !== brand })
       setFormData(prevState =>({
         ...prevState,
         ...state
       }))
     }
-    
-   /*  let brandData;
-    productGroupQuery.data.forEach( item =>{
-      if(item.name === brand){
-        brandData = item;
+  }
+
+  const isChecked = (prop) =>{
+    let checked = false;
+    formData.brands.forEach( item =>{
+      if(item.name === prop){
+        checked = true
       }
     })
-    let brands = formData.extraData.brands; */
-    /* setFormData(prevState =>({
-      ...prevState,
-      extraData:{
-        ...prevState.extraData,
-        brands: [
-          ...prevState.extraData.brands,
-          brandData
-        ]
-      }
-    })) */
+    return checked;
   }
 
   const handleChange = (props) => (event) =>{
@@ -136,14 +127,8 @@ const AddCompany = () => {
 
   const handleSubmit = (e) =>{
     e.preventDefault();
-    return console.log(formData);
-    let data = {...formData};
-    data.logo = base64Image;
-    data.logoFileName = selectedFile.name
-    setFormData(prevState =>({
-      ...prevState,
-      ...data
-    }))
+    //return console.log(formData);
+    companyMutation.mutate();
   }
 
 
@@ -171,7 +156,13 @@ const AddCompany = () => {
           <div className="mb-3">
             <label htmlFor="companyLogo" className="form-label">Company Logo</label>
             <input className="form-control form-control-lg" id="companyLogo" accept="image/*" type="file" onChange={uploadImage}/>
+            {imageUrl &&
+            <div>
+              <h6 className='small fw-bold mt-3'>Logo Preview</h6>
+              <img src={imageUrl} alt="Logo Preview" className='border rounded' width="100px"/>
+            </div>}
           </div>
+
 
           <div className="mb-3">
             <label htmlFor="companyEmail" className="form-label">Company Email</label>
@@ -187,22 +178,10 @@ const AddCompany = () => {
           <div className="mb-3">
             <label htmlFor="brandsAssigned" className="form-label">Brands</label>
             {!productGroupQuery.isLoading && listBrands()}
-            {/* <div className="form-check">
-              <input className="form-check-input" type="checkbox" value="" id="defaultCheck1" />
-              <label className="form-check-label" htmlFor="defaultCheck1">
-                Brand 1
-              </label>
-            </div>
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" value="" id="defaultCheck2" />
-              <label className="form-check-label" htmlFor="defaultCheck2">
-                Brand 2
-              </label>
-            </div> */}
           </div>
 
           <div className="d-flex mt-5">
-            <button className="btn btnPurple m-0 px-5" disabled={companyMutation.isLoading} onClick={handleSubmit}>Submit</button>
+            <button className="btn btnPurple m-0 px-5" disabled={companyMutation.isLoading} onClick={handleSubmit}> {companyMutation.isLoading ? <Spinner /> : "Submit"}</button>
             <button className="btn btn-secondary ms-3 px-5" disabled={companyMutation.isLoading} onClick={() => navigate("/app/company")}>Cancel</button>
           </div>
         </form>

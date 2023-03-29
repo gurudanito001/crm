@@ -14,6 +14,11 @@ body {
   font-size: .75rem;
 }
 
+select, input, textarea {
+  font-size: .8rem !important;
+  font-weight: 600 !important;
+}
+
 a {
   color: #565656;
   text-decoration: none;
@@ -87,11 +92,11 @@ input[type=file]::file-selector-button {
   font-size: .9rem;
   padding: 0px 30px;
   height: 50px;
-  background: linear-gradient(to right, #DA22FF 0%, #840cee  51%, #DA22FF  100%);
+  /* background: linear-gradient(to right, #DA22FF 0%, #840cee  51%, #DA22FF  100%); */
   text-align: center;
   transition: 0.5s;
   background-size: 200% auto;
-  color: white;            
+  /* color: white;  */           
   box-shadow: 0 0 20px #eee;
   border-radius: 10px;
 }
@@ -175,8 +180,15 @@ input[type=file]::file-selector-button:hover {
 
 
 @media screen and (min-width: 1000px) {
-  .mainContent{
+  .mainContent {
     height: calc(100vh - 99px);
+    overflow: auto;
+  }
+}
+
+@media screen and (max-width: 999px) {
+  .mainContent {
+    height: calc(100vh - 82px);
     overflow: auto;
   }
 }

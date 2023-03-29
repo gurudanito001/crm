@@ -21,7 +21,7 @@ const EmployeeListItem = ({id, firstName, middleName, lastName,  staffCadre, ema
         </article>
       </div>
       <div className='w-25 d-flex align-items-center'>
-        <span className='small'>{staffCadre}</span>
+        <span className='small fw-bold ms-auto'>{staffCadre}</span>
       </div>
     </li>
   )
@@ -47,12 +47,6 @@ const AllEmployees = () => {
     />)
   }
 
-  /* if(employeeQuery.isLoading){
-    return "Fetching Employees"
-  }
-  if(employeeQuery.isError){
-    return console.log(employeeQuery.error)
-  } */
   
   return (
     <Layout>
@@ -67,6 +61,10 @@ const AllEmployees = () => {
         </div>}
         <ul className='mt-5'>
           {!employeeQuery.isLoading && !employeeQuery.isError && listAllEmployees()}
+          {!employeeQuery.isLoading && !employeeQuery.isError && employeeQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Employee was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new employee</span>
+          </div>}
         </ul>
       </section>
     </Layout>

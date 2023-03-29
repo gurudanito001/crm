@@ -1,31 +1,29 @@
 import '../../../styles/auth.styles.css';
 import { useEffect, useState } from "react";
-import Layout from "../../../components/layout";
 import { useNavigate, useLocation } from "react-router-dom";
-import { apiPost, apiGet } from '../../../services/apiService';
+import { apiPost, apiGet, apiPut } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import NaijaStates from 'naija-state-local-government';
 import { Spinner } from '../../../components/spinner';
 
 
-const AddBranch = () => {
+const EditBranchDetails = ({data, handleCancel}) => {
   const navigate = useNavigate()
   const {state} = useLocation();
 
+
   useEffect(() =>{
-    if(state){
       setFormData( prevState => ({
         ...prevState,
-        ...state
+        ...data
       }))
-    }
   }, [])
   const queryClient = useQueryClient();
-  const branchMutation = useMutation({
-    mutationFn: ()=> apiPost({ url: `/branch/create`, data: formData }).then(res => console.log(res.payload)),
+  const branchDetailsMutation = useMutation({
+    mutationFn: ()=> apiPut({ url: `/branch/${data.id}`, data: formData }).then(res => console.log(res.payload)),
     onSuccess: () =>{
       queryClient.invalidateQueries(["allBranches"])
-      navigate("/app/branch")
+      handleCancel()
     }
   })
 
@@ -84,14 +82,13 @@ const AddBranch = () => {
   const handleSubmit = (e) =>{
     e.preventDefault()
     //return console.log(formData)
-    branchMutation.mutate()
+    branchDetailsMutation.mutate()
   }
 
   return (
-    <Layout>
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
-        <header className="h3 fw-bold">Add Branch</header>
-        <p>Fill in Branch Information.</p>
+        <header className="h3 fw-bold">Edit Branch Details</header>
+        <p>Make Changes to Branch Information.</p>
 
         <form className="mt-5">
           <div className="mb-3">
@@ -137,14 +134,13 @@ const AddBranch = () => {
           </div>
 
           <div className="d-flex mt-5">
-            <button className="btn btnPurple m-0 px-5" disabled={branchMutation.isLoading} onClick={handleSubmit}>{branchMutation.isLoading ? <Spinner /> : "Submit"}</button>
-            <button className="btn btn-secondary ms-3 px-5" disabled={branchMutation.isLoading} onClick={() => navigate("/app/branch")}>Cancel</button>
+            <button className="btn btnPurple m-0 px-5" disabled={branchDetailsMutation.isLoading} onClick={handleSubmit}>{branchDetailsMutation.isLoading ? <Spinner /> : "Submit"}</button>
+            <button className="btn btn-secondary ms-3 px-5" disabled={branchDetailsMutation.isLoading} onClick={handleCancel}>Cancel</button>
           </div>
         </form>
       </section>
-    </Layout>
 
   )
 }
 
-export default AddBranch;
+export default EditBranchDetails;

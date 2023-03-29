@@ -35,6 +35,11 @@ const AddEmployee = () => {
     queryFn: () => apiGet({url: "/branch"}).then( (res) => res.payload)
   })
 
+  const productGroupQuery = useQuery({
+    queryKey: ["allProductGroups"],
+    queryFn: () => apiGet({url: "/productGroup"}).then( (res) => res.payload)
+  })
+
 
 
 
@@ -51,7 +56,6 @@ const AddEmployee = () => {
     supervisor: "",
     productHead: "",
     locationManager: "",
-    subordinate: "",
     employmentDate: "",
     brandsAssigned: [],
   });
@@ -89,16 +93,66 @@ const AddEmployee = () => {
   }
 
   const listEmployeeOptions = () =>{
-    if(employeeQuery.data.length > 0){
-      return employeeQuery.data.map(employee =>
+    let eligibleEmployees = employeeQuery.data.filter( employee => employee.staffCadre !== "Sales Representative");
+    if(eligibleEmployees.length > 0){
+      return eligibleEmployees.map(employee =>
         <option key={employee.id} value={employee.id}>{employee.firstName} {employee.middleName[0]} {employee.lastName}</option>
       )
     }
   }
 
+  const handleCheck = (brand) =>(event) =>{
+    if(event.target.checked){
+      let brandData;
+      productGroupQuery.data.forEach( item =>{
+        if(item.name === brand){
+          brandData = item;
+        }
+      })
+      let state = formData;
+      state.brandsAssigned.push(brandData);
+      setFormData(prevState =>({
+        ...prevState,
+        ...state
+      }))
+    }else{
+      let state = formData;
+      state.brandsAssigned = state.brandsAssigned.filter( function(item){ return item.name !== brand })
+      setFormData(prevState =>({
+        ...prevState,
+        ...state
+      }))
+    }
+  }
+
+  const isChecked = (prop) =>{
+    let checked = false;
+    formData.brandsAssigned.forEach( item =>{
+      if(item.name === prop){
+        checked = true
+      }
+    })
+    return checked;
+  }
+
+  const listBrands = () =>{
+    return productGroupQuery.data.map(productGroup =>
+      <div className="form-check" key={productGroup.id}>
+        <input className="form-check-input" type="checkbox" checked={isChecked(productGroup.name)} onChange={handleCheck(productGroup.name)} value={productGroup.id} id={productGroup.id} />
+        <label className="form-check-label fw-bold" htmlFor={productGroup.id}>
+          {productGroup.name}
+        </label>
+      </div>
+    )
+  }
+
   const listBranchOptions = () =>{
-    if(branchQuery.data.length > 0){
-      return branchQuery.data.map(branch =>
+    let branches = branchQuery.data;
+    if(formData.companyId){
+      branches = branches.filter( branch => branch.companyId === formData.companyId)
+    }
+    if(branches.length > 0){
+      return branches.map(branch =>
         <option key={branch.id} value={branch.id}>{branch.name}</option>
       )
     }
@@ -106,7 +160,7 @@ const AddEmployee = () => {
 
   const handleSubmit = (e) =>{
     e.preventDefault()
-    //return console.log(formData)
+    // return console.log(formData)
     employeeMutation.mutate();
   }
   
@@ -180,30 +234,12 @@ const AddEmployee = () => {
               </select>
             </div>
             <div className="mb-3">
-              <label htmlFor="subordinate" className="form-label">Subordinate</label>
-              <select className="form-select shadow-none" id="subordinate" value={formData.subordinate} onChange={handleChange("subordinate")} aria-label="Default select example">
-                <option value="">Select Subordinate</option>
-                {!employeeQuery.isLoading && listEmployeeOptions()}
-              </select>
-            </div>
-            <div className="mb-3">
               <label htmlFor="employmentDate" className="form-label">Employment Date</label>
               <input type="date" className="form-control shadow-none" id="employmentDate" onChange={handleChange("employmentDate")} value={formData.employmentDate} placeholder="Enter Employee Employment Date" />
             </div>
             <div className="mb-3">
-              <label htmlFor="brandsAssigned" className="form-label">Brands Assigned</label>
-              <div className="form-check">
-                <input className="form-check-input" type="checkbox" value="" id="defaultCheck1" />
-                <label className="form-check-label" htmlFor="defaultCheck1">
-                  Brand 1
-                </label>
-              </div>
-              <div className="form-check">
-                <input className="form-check-input" type="checkbox" value="" id="defaultCheck2" />
-                <label className="form-check-label" htmlFor="defaultCheck2">
-                  Brand 2
-                </label>
-              </div>
+              <label htmlFor="brandsAssigned" className="form-label">Brands</label>
+              {!productGroupQuery.isLoading && listBrands()}
             </div>
             <div className="d-flex mt-5">
               <button className="btn btnPurple m-0 px-5" disabled={employeeMutation.isLoading} onClick={handleSubmit}>{employeeMutation.isLoading ? <Spinner /> : "Submit"}</button>

@@ -19,7 +19,7 @@ const BranchListItem = ({id, name, code, address}) =>{
         </article>
       </div>
       <div className='w-25 d-flex align-items-center'>
-        <span className='small'>{code}</span>
+        <span className='small fw-bold ms-auto'>{code}</span>
       </div>
     </li>
   )

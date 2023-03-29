@@ -1,5 +1,5 @@
 import '../../../styles/auth.styles.css';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../../../components/layout";
 import { useNavigate } from 'react-router-dom';
 import NaijaStates from 'naija-state-local-government';
@@ -7,6 +7,7 @@ import industries from 'industries';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { apiPost } from '../../../services/apiService';
 import { Spinner } from '../../../components/spinner';
+import { getUserData } from '../../../services/localStorageService';
 
 
 const AddCustomer = () => {
@@ -21,6 +22,7 @@ const AddCustomer = () => {
   })
   const [showNotification, setShowNotification] = useState(false);
   const [formData, setFormData] = useState({
+    employeeId: "",
     companyName: "",
     state: "",
     lga: "",
@@ -35,6 +37,15 @@ const AddCustomer = () => {
     customerType: "",
     enquirySource: ""
   });
+
+  useEffect(()=>{
+    let userData = getUserData();
+    console.log(userData)
+    setFormData(prevState => ({
+      ...prevState,
+      employeeId: userData.id
+    }))
+  }, [])
 
   const listStateOptions = () =>{
     return NaijaStates.states().map(state =>
@@ -56,6 +67,13 @@ const AddCustomer = () => {
   }
 
   const handleChange = (props) => (event) =>{
+    if(props === "state"){
+      setFormData(prevState => ({
+        ...prevState,
+        lga: "",
+        city: ""
+      }))
+    }
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
@@ -111,7 +129,7 @@ const AddCustomer = () => {
           </div>
           <div className="mb-3">
             <label htmlFor="companyWebsite" className="form-label">Company Website</label>
-            <input type="text" className="form-control shadow-none" id="companyWebsite" value={formData.companyWebsite} onChange={handleChange("companyWebsite")} placeholder="wwww.companywebsite.com" />
+            <input type="text" className="form-control shadow-none" id="companyWebsite" value={formData.companyWebsite} onChange={handleChange("companyWebsite")} placeholder="www.companywebsite.com" />
           </div>
           <div className="mb-3">
             <label htmlFor="chairman" className="form-label">Chairman</label>

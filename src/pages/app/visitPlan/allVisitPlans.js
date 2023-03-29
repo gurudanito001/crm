@@ -3,22 +3,30 @@ import '../../../styles/auth.styles.css';
 import { useState } from "react";
 import Layout from "../../../components/layout";
 import { useNavigate } from 'react-router-dom';
+import { apiGet } from '../../../services/apiService';
+import { useQuery } from "@tanstack/react-query";
+import { Spinner } from '../../../components/spinner';
 
 
 
-const VisitPlanListItem = ({handleClick}) =>{
+const VisitPlanListItem = ({id, monthlyVisitPlan, weeklyVisitPlan}) =>{
   const navigate = useNavigate()
   return(
-    <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate("/app/plan/r355645")}>
-      <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-car-front text-white fs-5"></i></span>
-        <article>
-          <span className='h6 fw-bold'>Name of Visit Plan</span> <br />
-          <span> Other details about the visit plan</span>
-        </article>
-      </div>
-      <div className='w-25 d-flex align-items-center'>
-        <span className='small'>Stock count</span>
+    <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/plan/${id}`)}>
+      <div className='w-75 d-flex align-items-start pe-2'>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-calendar3 text-white fs-5"></i></span>
+        <div>
+          <article>
+            <span className='h6 fw-bold'>Weekly Visit Plan</span> <br />
+            <span>{weeklyVisitPlan}</span>
+          </article>
+
+          <article className='mt-3'>
+            <span className='h6 fw-bold'>Monthly Visit Plan</span> <br />
+            <span>{monthlyVisitPlan}</span>
+          </article>
+        </div>
+        
       </div>
     </li>
   )
@@ -27,6 +35,20 @@ const VisitPlanListItem = ({handleClick}) =>{
 
 const AllVisitPlans = () => {
   const [showNotification, setShowNotification] = useState(false);
+
+  const visitPlanQuery = useQuery({
+    queryKey: ["allVisitPlans"],
+    queryFn: () => apiGet({url: "/visitPlan"}).then( (res) => res.payload)
+  })
+
+  const listAllVisitPlans = () =>{
+    return visitPlanQuery.data.map( visitPlan => <VisitPlanListItem 
+      id={visitPlan.id}
+      key={visitPlan.id}
+      monthlyVisitPlan={visitPlan.monthlyVisitPlan}
+      weeklyVisitPlan={visitPlan.weeklyVisitPlan}
+    />)
+  }
 
   return (
     <Layout>
@@ -37,17 +59,12 @@ const AllVisitPlans = () => {
         </header>
         <p>All Visit Plans are listed below</p>
 
+        {visitPlanQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
+            Fetching Visit Plans <Spinner />
+        </div>}
+
         <ul className='mt-5'>
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
-          <VisitPlanListItem />
+        {!visitPlanQuery.isLoading && !visitPlanQuery.isError && listAllVisitPlans()}
         </ul>
       </section>
     </Layout>

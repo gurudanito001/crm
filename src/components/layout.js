@@ -13,7 +13,7 @@ const Layout = ({children}) =>{
   const [sidebarTab, setSidebarTab] = useState("notifications")
 
   useEffect(() =>{
-    let parsedUserData = JSON.parse(userData)
+    let parsedUserData = userData
     if(!parsedUserData.token){
       navigate("/login")
     }
@@ -33,7 +33,7 @@ const Layout = ({children}) =>{
           </div>
           <div className="row">
             <div className="col px-0 px-lg-3 pt-lg-3">
-              <div className="bg-white rounded pb-5 mainContent" >
+              <div className="bg-white rounded pb-5 mainContent">
                 {children}
               </div>
             </div>
@@ -51,9 +51,6 @@ const Layout = ({children}) =>{
             </div>
           </div>
         </main>
-        <aside>
-          
-        </aside>
       </div>
 
     </div>

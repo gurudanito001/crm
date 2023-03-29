@@ -19,7 +19,7 @@ export function setUserData(data){
 export function getUserData(){
   let data = localStorage.getItem('userData')
   if(data){
-    return data
+    return JSON.parse(data)
   }
   return false;
 }

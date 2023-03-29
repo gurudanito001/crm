@@ -33,7 +33,7 @@ export const ListItem = ({title, active, icon, closeSidebar, link, pathname}) =>
 const SideBar = () =>{
   const location = useLocation();
   const [closeSidebar, setCloseSidebar] = useState(false);
-  const userData = JSON.parse(getUserData());
+  const userData = getUserData();
   const {firstName, middleName, lastName} = userData;
   const handleToggleSidebar = () =>{
     setCloseSidebar(prevState => !prevState)

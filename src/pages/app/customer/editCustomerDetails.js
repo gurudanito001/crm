@@ -60,7 +60,13 @@ const EditCustomerDetails = ({data, handleCancel}) => {
   }
 
   const handleChange = (props) => (event) =>{
-
+    if(props === "state"){
+      setFormData(prevState => ({
+        ...prevState,
+        lga: "",
+        city: ""
+      }))
+    }
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value

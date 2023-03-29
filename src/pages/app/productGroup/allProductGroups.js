@@ -21,7 +21,7 @@ const ProductGroupListItem = ({id, name, code, description}) =>{
         </article>
       </div>
       <div className='w-25 d-flex align-items-center'>
-        <span className='small'>{code}</span>
+        <span className='small fw-bold ms-auto'>{code}</span>
       </div>
     </li>
   )

@@ -47,8 +47,8 @@ const Login = () => {
       .then((res) => {
         setPostingData(false);
         const {token, user} = res.payload
-        const {firstName, lastName, middleName, staffCadre} = user;
-        setUserData(JSON.stringify({token, firstName, lastName, middleName, staffCadre}))
+        const {firstName, lastName, middleName, staffCadre, id, companyId, companyName} = user;
+        setUserData(JSON.stringify({token, id, firstName, lastName, middleName, staffCadre, companyId, companyName}))
         //dispatch(setUserData(res.payload))
         //setToken(res.payload.token)
         console.log(res);

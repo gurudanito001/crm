@@ -1,10 +1,56 @@
 
-import { useState } from "react";
-import Layout from "../../../components/layout";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { apiPost, apiGet, apiPut } from '../../../services/apiService';
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Spinner } from '../../../components/spinner';
 
 
-const EditPaymentDetails = ({handleCancel}) => {
-  const [showNotification, setShowNotification] = useState(false);
+const EditPaymentDetails = ({ data, handleCancel }) => {
+  const queryClient = useQueryClient();
+
+  const [formData, setFormData] = useState({
+    invoiceNumber: "",
+    invoiceDate: "",
+    deliveryDate: "",
+    nameOfCustomer: "",
+    customerAddress: "",
+    modelOfVehiclePurchased: "",
+    quantityPurchased: "",
+    advancePaymentReceived: "",
+    outstandingAmount: "",
+    vatDeducted: "",
+    whtDeducted: "",
+    vatPaymentReceipt: "",
+    additionalInformation: ""
+  })
+  const paymentDetailsMutation = useMutation({
+    mutationFn: () => apiPut({ url: `/payment/${data.id}`, data: formData }).then(res => console.log(res.payload)),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["allPayments"])
+      handleCancel();
+    }
+  })
+
+  useEffect(()=>{
+    setFormData( prevState =>({
+      ...prevState,
+      ...data
+    }))
+  }, [])
+
+  const handleChange = (props) => (event) => {
+    setFormData(prevState => ({
+      ...prevState,
+      [props]: event.target.value
+    }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // return console.log(formData)
+    paymentDetailsMutation.mutate();
+  }
 
   return (
     <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
@@ -14,92 +60,65 @@ const EditPaymentDetails = ({handleCancel}) => {
       <form className="mt-5">
 
         <div className="mb-3">
-          <label htmlFor="companyName" className="form-label">Company Name</label>
-          <input type="text" className="form-control shadow-none" id="companyName" placeholder="Company Name" />
+          <label htmlFor="invoiceNumber" className="form-label">Invoice Number</label>
+          <input type="text" className="form-control shadow-none" value={formData.invoiceNumber} onChange={handleChange("invoiceNumber")} id="invoiceNumber" placeholder="Invoice Number" />
         </div>
         <div className="mb-3">
-          <label htmlFor="state" className="form-label">State</label>
-          <select className="form-select shadow-none" id="state" aria-label="Default select example">
-            <option value="1">State 1</option>
-            <option value="2">State 2</option>
-            <option value="3">State 3</option>
-          </select>
+          <label htmlFor="invoiceDate" className="form-label">Invoice Date</label>
+          <input type="date" className="form-control shadow-none" value={formData.invoiceDate} onChange={handleChange("invoiceDate")} id="invoiceDate" placeholder="Invoice Date" />
         </div>
         <div className="mb-3">
-          <label htmlFor="lga" className="form-label">LGA</label>
-          <select className="form-select shadow-none" id="lga" aria-label="Default select example">
-            <option value="1">LGA 1</option>
-            <option value="2">LGA 2</option>
-            <option value="3">LGA 3</option>
-          </select>
+          <label htmlFor="deliveryDate" className="form-label">Delivery Date</label>
+          <input type="date" className="form-control shadow-none" value={formData.deliveryDate} onChange={handleChange("deliveryDate")} id="deliveryDate" placeholder="Delivery Date" />
         </div>
         <div className="mb-3">
-          <label htmlFor="city" className="form-label">City</label>
-          <select className="form-select shadow-none" id="city" aria-label="Default select example">
-            <option value="1">City 1</option>
-            <option value="2">City 2</option>
-            <option value="3">City 3</option>
-          </select>
+          <label htmlFor="nameOfCustomer" className="form-label">Name Of Customer</label>
+          <input type="text" className="form-control shadow-none" value={formData.nameOfCustomer} onChange={handleChange("nameOfCustomer")} id="nameOfCustomer" placeholder="Name Of Customer" />
         </div>
         <div className="mb-3">
-          <label htmlFor="address1" className="form-label">Address 1</label>
-          <textarea className="form-control shadow-none" id="address1" rows={3}></textarea>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="address2" className="form-label">Address 2</label>
-          <textarea className="form-control shadow-none" id="address2" rows={3}></textarea>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="companyWebsite" className="form-label">Company Website</label>
-          <input type="text" className="form-control shadow-none" id="companyWebsite" placeholder="Website of Company" />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="chairman" className="form-label">Chairman</label>
-          <input type="text" className="form-control shadow-none" id="chairman" placeholder="Chairman of Company" />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="mdceo" className="form-label">MD/CEO</label>
-          <input type="text" className="form-control shadow-none" id="mdceo" placeholder="MD/CEO of Company" />
+          <label htmlFor="customerAddress" className="form-label">Customer Address</label>
+          <textarea className="form-control shadow-none" value={formData.customerAddress} onChange={handleChange("customerAddress")} id="customerAddress" rows={3}></textarea>
         </div>
 
         <div className="mb-3">
-          <label htmlFor="industry" className="form-label">Industry</label>
-          <select className="form-select shadow-none" id="industry" aria-label="Default select example">
-            <option value="1">Industry 1</option>
-            <option value="2">Industry 2</option>
-            <option value="3">Industry 3</option>
-          </select>
+          <label htmlFor="modelOfVehiclePurchased" className="form-label">Model of Vehicle Purchased</label>
+          <input type="text" className="form-control shadow-none" value={formData.modelOfVehiclePurchased} onChange={handleChange("modelOfVehiclePurchased")} id="modelOfVehiclePurchased" placeholder="Model of Vehicle Purchased" />
         </div>
         <div className="mb-3">
-          <label htmlFor="businesstype" className="form-label">Business Type</label>
-          <select className="form-select shadow-none" id="businesstype" aria-label="Default select example">
-            <option value="1">Business Type 1</option>
-            <option value="2">Business Type 2</option>
-            <option value="3">Business Type 3</option>
-          </select>
+          <label htmlFor="quantityPurchased" className="form-label">Quantity Purchased</label>
+          <input type="number" className="form-control shadow-none" value={formData.quantityPurchased} onChange={handleChange("quantityPurchased")} id="quantityPurchased" placeholder="Quantity Purchased" />
         </div>
         <div className="mb-3">
-          <label htmlFor="customertype" className="form-label">Customer Type</label>
-          <select className="form-select shadow-none" id="customertype" aria-label="Default select example">
-            <option value="1">Customer Type 1</option>
-            <option value="2">Customer Type 2</option>
-            <option value="3">Customer Type 3</option>
-          </select>
+          <label htmlFor="advancePaymentReceived" className="form-label">Advance Payment Received</label>
+          <input type="number" className="form-control shadow-none" value={formData.advancePaymentReceived} onChange={handleChange("advancePaymentReceived")} id="advancePaymentReceived" placeholder="Advance Payment Received" />
         </div>
         <div className="mb-3">
-          <label htmlFor="enquirysource" className="form-label">Enquiry Source</label>
-          <select className="form-select shadow-none" id="enquirysource" aria-label="Default select example">
-            <option value="1">Enquiry Source 1</option>
-            <option value="2">Enquiry Source 2</option>
-            <option value="3">Enquiry Source 3</option>
-          </select>
+          <label htmlFor="outstandingAmount" className="form-label">Outstanding Amount</label>
+          <input type="number" className="form-control shadow-none" value={formData.outstandingAmount} onChange={handleChange("outstandingAmount")} id="outstandingAmount" placeholder="Outstanding Amount" />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="vatDeducted" className="form-label">VAT Deducted</label>
+          <input type="number" className="form-control shadow-none" value={formData.vatDeducted} onChange={handleChange("vatDeducted")} id="vatDeducted" placeholder="VAT Amount Deducted" />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="whtDeducted" className="form-label">WHT Deducted</label>
+          <input type="number" className="form-control shadow-none" value={formData.whtDeducted} onChange={handleChange("whtDeducted")} id="whtDeducted" placeholder="WHT Amount Deducted" />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="vatPaymentReceipt" className="form-label">VAT Payment Received</label>
+          <input type="text" className="form-control shadow-none" value={formData.vatPaymentReceipt} onChange={handleChange("vatPaymentReceipt")} id="vatPaymentReceipt" placeholder="PAID, NOT PAID, REQUESTED" />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="additionalInformation" className="form-label">Additional Information</label>
+          <textarea className="form-control shadow-none" value={formData.additionalInformation} onChange={handleChange("additionalInformation")} id="additionalInformation" rows={3}></textarea>
         </div>
 
         <div className="d-flex mt-5">
-          <button className="btn btnPurple m-0 px-5">Save Changes</button> 
+        <button className="btn btnPurple m-0 px-5" disabled={paymentDetailsMutation.isLoading} onClick={handleSubmit}>{paymentDetailsMutation.isLoading ? <Spinner /> : "Submit"}</button>
           <button className="btn btn-secondary ms-3  px-5" onClick={handleCancel}>Cancel</button>
         </div>
-        
+
       </form>
     </section>
 

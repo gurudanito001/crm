@@ -9,7 +9,7 @@ import { Spinner } from '../../../components/spinner';
 
 
 
-const CompanyListItem = ({id, name, group, code, address }) =>{
+const CompanyListItem = ({id, name, email, code }) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/company/${id}`)}>
@@ -17,11 +17,11 @@ const CompanyListItem = ({id, name, group, code, address }) =>{
         <span className='bgPurple p-3 me-3'><i className="bi bi-building text-white fs-5"></i></span>
         <article>
           <span className='h6 fw-bold'>{name}</span> <br />
-          <span>{address}</span>
+          <span>{email}</span>
         </article>
       </div>
       <div className='w-25 d-flex align-items-center'>
-        <span className='small'>{code}</span>
+        <span className='small fw-bold ms-auto'>{code}</span>
       </div>
     </li>
   )
@@ -43,6 +43,7 @@ const AllCompanies = () => {
       key={company.id}
       id={company.id}
       name={company.name}
+      email={company.email}
       group={company.group}
       code={company.code}
       address={company.address}
@@ -62,6 +63,10 @@ const AllCompanies = () => {
         </div>}
         <ul className='mt-5'>
           {!companyQuery.isLoading && !companyQuery.isError && listAllCompanies()}
+          {!companyQuery.isLoading && !companyQuery.isError && companyQuery.data.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Company was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new company</span>
+          </div>}
         </ul>
       </section>
     </Layout>

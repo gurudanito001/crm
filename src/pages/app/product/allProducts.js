@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
-
+import formatAsCurrency from '../../../services/formatAsCurrency';
 
 
 const ProductListItem = ({id, name, code, description, price}) =>{
@@ -21,7 +21,7 @@ const ProductListItem = ({id, name, code, description, price}) =>{
         </article>
       </div>
       <div className='w-25 d-flex align-items-center'>
-        <span className='small'>{price}</span>
+        <span className='small fw-bold ms-auto'>{formatAsCurrency(price)}</span>
       </div>
     </li>
   )
@@ -54,6 +54,10 @@ const AllProducts = () => {
           <a href='/app/product/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
         <p>All your products are listed below</p>
+
+        {productQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
+            Fetching Products <Spinner />
+        </div>}
 
         <ul className='mt-5'>
           {!productQuery.isLoading && !productQuery.isError && listAllProducts()}

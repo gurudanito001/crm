@@ -21,7 +21,7 @@ const CustomerListItem = ({id, companyName, address1, address2, industry}) =>{
         </article>      
       </div>
       <div className='w-25 d-flex align-items-center'>
-        <span className='small'>{industry}</span>
+        <span className='small fw-bold ms-auto'>{industry}</span>
       </div>
     </li>
   )
@@ -61,6 +61,10 @@ const AllCustomers = () => {
         </div>}
         <ul className='mt-5'>
           {!customerQuery.isLoading && !customerQuery.isError && listAllCustomers()}
+          {!customerQuery.isLoading && !customerQuery.isError && customerQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
+              <p className='h6 fw-bold'>No Customer was found !!</p>
+              <span className='text-info'>Click the [+Add] button to add a new customer</span>
+          </div>}
         </ul>
       </section>
     </Layout>

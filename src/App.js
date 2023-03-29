@@ -15,6 +15,7 @@ import AllStates from './pages/app/state/allStates';
 
 import AddBranch from './pages/app/branch/addBranch';
 import AllBranches from './pages/app/branch/allBranches';
+import BranchDetails from './pages/app/branch/branchDetails';
 
 import AddLga from './pages/app/lga/addLga';
 import AllLgas from './pages/app/lga/allLgas';
@@ -27,12 +28,18 @@ import AddCustomer from './pages/app/customer/addCustomer';
 import AllCustomers from './pages/app/customer/allCustomers';
 import CustomerDetails from './pages/app/customer/customerDetails';
 
-import AddCustomerVisit from './pages/app/customerVisit/addCustomerVisit';
+import AddContactPerson from './pages/app/contactPerson/addContactPerson';
+import ContactPersonDetails from './pages/app/contactPerson/contactPersonDetails';
+
+import ScheduleCustomerVisit from './pages/app/customerVisit/scheduleCustomerVisit';
+import ReportCustomerVisit from './pages/app/customerVisit/reportCustomerVisit';
 import AllCustomerVisits from './pages/app/customerVisit/allCustomerVisits';
 import CustomerVisitDetails from './pages/app/customerVisit/customerVisitDetails';
+import EditCustomerVisitDetails from './pages/app/customerVisit/editCustomerVisitDetails';
 
 import AddProductGroup from './pages/app/productGroup/addProductGroup';
 import AllProductGroups from './pages/app/productGroup/allProductGroups';
+import ProductGroupDetails from './pages/app/productGroup/productGroupDetails';
 
 import AddProduct from './pages/app/product/addProduct';
 import AllProducts from './pages/app/product/allProducts';
@@ -64,6 +71,8 @@ import VehicleDeliveryDetails from './pages/app/vehicleDelivery/vehicleDeliveryD
 
 
 
+
+
 function App() {
   return (
     <>
@@ -85,6 +94,7 @@ function App() {
 
           <Route path="/app/branch" element={<AllBranches />} />
           <Route path="/app/branch/add" element={<AddBranch />} />
+          <Route path="/app/branch/:id" element={<BranchDetails />} />
 
           <Route path="/app/company" element={<AllCompanies />} />
           <Route path="/app/company/add" element={<AddCompany />} />
@@ -98,12 +108,18 @@ function App() {
           <Route path="/app/customer/add" element={<AddCustomer />} />
           <Route path="/app/customer/:id" element={<CustomerDetails />} />
 
+          <Route path="/app/customer/contactPerson/add" element={<AddContactPerson />} />
+          <Route path="/app/customer/contactPerson/:id" element={<ContactPersonDetails />} />
+
           <Route path="/app/visit/" element={<AllCustomerVisits />} />
-          <Route path="/app/visit/add" element={<AddCustomerVisit />} />
           <Route path="/app/visit/:id" element={<CustomerVisitDetails />} />
+          <Route path="/app/visit/schedule" element={<ScheduleCustomerVisit />} />
+          <Route path="/app/visit/report" element={<ReportCustomerVisit />} />
+          
 
           <Route path="/app/prodGroup" element={<AllProductGroups />} />
           <Route path="/app/prodGroup/add" element={<AddProductGroup />} />
+          <Route path="/app/prodGroup/:id" element={<ProductGroupDetails />} />
 
           <Route path="/app/product/" element={<AllProducts />} />
           <Route path="/app/product/add" element={<AddProduct />} />
