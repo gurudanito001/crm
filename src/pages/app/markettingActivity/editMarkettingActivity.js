@@ -6,10 +6,12 @@ import formatAsCurrency from '../../../services/formatAsCurrency';
 import { apiPost, apiPut, apiGet } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
-
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -24,6 +26,8 @@ const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
     pdfDetails: ""
   })
 
+  const [errors, setErrors] = useState({});
+
   const [ selectedFile, setSelectedFile] = useState("");
   const [ imageUrl, setImageUrl] = useState([]);
   const [ tempImageUrl, setTempImageUrl] = useState("")
@@ -32,17 +36,41 @@ const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
 
   const queryClient = useQueryClient();
   const markettingActivityMutation = useMutation({
-    mutationFn: (data)=> apiPut({ url: `/markettingActivity/${data.id}`, data }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: (data)=> apiPut({ url: `/markettingActivity/${data.id}`, data }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allMarkettingActivities"])
       handleCancel()
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
 
   const employeeQuery = useQuery({
     queryKey: ["allEmployees"],
-    queryFn: () => apiGet({url: "/employee"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/employee"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listEmployeeOptions = () =>{
@@ -139,21 +167,6 @@ const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
       <button onClick={deleteImage(index, "database")} style={{ width: "20px", height: "20px", borderRadius: "14px", background: "rgba(0, 0, 0, 0.693)", position: "relative", top: "-15px", left: "-8px" }}
         className='btn d-flex align-items-center justify-content-center text-white'><i className="bi bi-x"></i></button>
     </li>)
-
-    /* if(formData.pictures.length > 0){
-      formData.pictures.forEach( (img, index) => images.push(<li key={img + index} className='m-2 d-flex align-items-start'>
-        <img src={img} alt="Product Item" width="200px" />
-        <button onClick={deleteImage(index, "database")} style={{ width: "20px", height: "20px", borderRadius: "14px", background: "rgba(0, 0, 0, 0.693)", position: "relative", top: "-15px", left: "-8px"}} 
-        className='btn d-flex align-items-center justify-content-center text-white'><i className="bi bi-x"></i></button>
-      </li>))
-    }
-    if(imageUrl.length > 0){
-      imageUrl.forEach( (img, index) => images.push(<li key={img + index} className='m-2 d-flex align-items-start'>
-        <img src={img} alt="Product Item" width="200px" />
-        <button onClick={deleteImage(index, "local")} style={{ width: "20px", height: "20px", borderRadius: "14px", background: "rgba(0, 0, 0, 0.693)", position: "relative", top: "-15px", left: "-8px"}} 
-        className='btn d-flex align-items-center justify-content-center text-white'><i className="bi bi-x"></i></button>
-      </li>))
-    } */
   }
   const listLocalImages = () =>{
     let images = [...new Set(imageUrl)];
@@ -210,6 +223,10 @@ const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
   }
 
   const handleSubmit = (e) =>{
@@ -222,8 +239,8 @@ const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
 
   return (
     <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
-        <header className="h3 fw-bold">Add Marketting Activity </header>
-        <p>Fill in Marketting Activity Information.</p>
+        <header className="h3 fw-bold">Add Marketing Activity </header>
+        <p>Fill in Marketing Activity Information.</p>
           <form className="mt-5">
 
           <div className="mb-3">
@@ -259,12 +276,12 @@ const EditMarkettingActivityDetails = ({ handleCancel, data }) => {
 
           <div className="mb-3">
             <label htmlFor="objective" className="form-label">Objective</label>
-            <input type="text" className="form-control shadow-none" value={formData.objective} onChange={handleChange("objective")} id="objective" placeholder="Objective of Marketting Activity" />
+            <input type="text" className="form-control shadow-none" value={formData.objective} onChange={handleChange("objective")} id="objective" placeholder="Objective of Marketing Activity" />
           </div>
 
           <div className="mb-3">
             <label htmlFor="targetResult" className="form-label">Target Result</label>
-            <input type="text" className="form-control shadow-none" value={formData.targetResult} onChange={handleChange("targetResult")} id="targetResult" placeholder="Target Result of Marketting Activity" />
+            <input type="text" className="form-control shadow-none" value={formData.targetResult} onChange={handleChange("targetResult")} id="targetResult" placeholder="Target Result of Marketing Activity" />
           </div>
 
           <div className="mb-3">

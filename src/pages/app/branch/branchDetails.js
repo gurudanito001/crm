@@ -9,6 +9,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import formatAsCurrency from '../../../services/formatAsCurrency';
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const BranchDetailListItem = ({title, description}) =>{
@@ -22,6 +24,7 @@ const BranchDetailListItem = ({title, description}) =>{
 
 
 const BranchDetails = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const {state} = useLocation();
   const queryClient = useQueryClient();
@@ -31,18 +34,40 @@ const BranchDetails = () => {
   const branchDetailsQuery = useQuery({
     queryKey: ["allBranches", id],
     queryFn: () => apiGet({url: `/branch/${id}`}).then( (res) => {
-      console.log(res.payload)
       return res.payload
-    }),
-    onSuccess: () =>{ console.log(branchDetailsQuery.data)}
+    })
+    .catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error?.response?.data?.message || error?.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const branchDeletion = useMutation({
-    mutationFn: ()=> apiDelete({ url: `/branch/${id}`}).then(res => console.log(res)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiDelete({ url: `/branch/${id}`}).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allBranches"])
       navigate(`/app/company/${state.id}`);
-    }
+    })
+    .catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listCompanyBrands = () =>{

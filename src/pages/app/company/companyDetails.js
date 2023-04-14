@@ -9,6 +9,8 @@ import { useParams, useNavigate,  } from 'react-router-dom';
 import { Spinner } from '../../../components/spinner';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import ListItem from '../../../components/listItem';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const CompanyDetailListItem = ({title, description}) =>{
@@ -23,6 +25,7 @@ const CompanyDetailListItem = ({title, description}) =>{
 
 const CompanyDetails = (props) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { id } = useParams();
 
@@ -31,6 +34,14 @@ const CompanyDetails = (props) => {
     queryFn: () => apiGet({url: `/company/${id}`}).then( (res) =>{ 
       console.log(res.payload)
       return res.payload
+    }).catch(error => {
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error?.response?.data?.message || error?.message,
+          key: Date.now(),
+        })
+      ); 
     })
   })
 
@@ -39,15 +50,29 @@ const CompanyDetails = (props) => {
     queryFn: () => apiGet({url: `/branch/company/${id}`}).then( (res) =>{ 
       console.log(res.payload)
       return res.payload
+    }).catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error?.response?.data?.message || error?.message,
+          key: Date.now(),
+        })
+      ); 
     })
   })
 
   const companyDeletion = useMutation({
-    mutationFn: ()=> apiDelete({ url: `/company/${id}`}).then(res => console.log(res)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiDelete({ url: `/company/${id}`}).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      ); 
       queryClient.invalidateQueries(["allCompanies"])
       navigate("/app/company");
-    }
+    })
   })
   const [currentScreen, setCurrentScreen] = useState("details")
 
@@ -69,8 +94,9 @@ const CompanyDetails = (props) => {
       title={branch.name}
       description={`${branch.address} ${branch.lga} ${branch.state}`}
       sideInfo={branch.code}
+      extraInfo={branch.isHeadOffice ? "HeadOffice" : ""}
       icon="bi-house-fill"
-      onClick={()=>navigate(`/app/branch/${branch.id}`, {state: companyDetailsQuery.data})}
+      onClick={()=>navigate(`/app/company/branch/${branch.id}`, {state: companyDetailsQuery.data})}
     />)
   }
 
@@ -88,8 +114,8 @@ const CompanyDetails = (props) => {
               </button>
               <ul className="dropdown-menu dropdown-menu-end p-0">
                 <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>setCurrentScreen("editDetails")}>Edit</button></li>
-                <li><button className='btn btn-sm btn-light text-dark fw-bold w-100'  disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>navigate("/app/branch/add", {state: {companyId: id}})} >Add Branch</button></li>
-                {/* <li><button className='btn btn-sm btn-light text-danger fw-bold w-100'  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">delete</button></li> */}
+                <li><button className='btn btn-sm btn-light text-dark fw-bold w-100'  disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>navigate("/app/company/branch/add", {state: {companyId: id}})} >Add Branch</button></li>
+                <li><button className='btn btn-sm btn-light text-danger fw-bold w-100'  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">delete</button></li>
               </ul>
             </div>
           
@@ -105,7 +131,7 @@ const CompanyDetails = (props) => {
         <ul className='mt-5'>
           <li className='py-2 d-flex flex-column flex-lg-row align-items-lg-center border-bottom'>
             <header className="small text-uppercase col-lg-4">Logo:</header>
-            <p className='fw-bold ms-lg-auto col-lg'><img src={companyDetailsQuery.data.logo} alt="Company Logo" /></p>
+            <p className='fw-bold ms-lg-auto col-lg'><img src={companyDetailsQuery.data.logo} width="100px" alt="Company Logo" /></p>
           </li>
           <CompanyDetailListItem title="Company Name" description={companyDetailsQuery.data.name} />
           <CompanyDetailListItem title="Company Group" description={companyDetailsQuery.data.group} />

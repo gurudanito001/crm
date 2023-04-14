@@ -1,17 +1,4 @@
-import Music from "../../../images/music.svg";
-import Health from "../../../images/health.svg";
-import Family from "../../../images/family.svg";
-import Travel from "../../../images/travel.svg";
-import Technology from "../../../images/technology.svg";
-import Food from "../../../images/food.svg";
-import Education from "../../../images/education.svg";
-import Automobile from "../../../images/automobile.svg";
-import Business from "../../../images/business.svg";
-import Finance from "../../../images/finance.svg";
-
-import { useState } from "react";
 import Layout from "../../../components/layout";
-import { useNavigate } from "react-router-dom";
 
 
 
@@ -27,7 +14,7 @@ const styles = {
     width: "160px",
     height: "132px",
     borderRadius: "20px",
-    boxShadow: "1px 5px 5px 7px #c586fc11 "/*  #840cee */
+    boxShadow: "1px 5px 5px 7px #c586fc11"
   }
 
 }

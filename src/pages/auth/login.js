@@ -1,25 +1,21 @@
-import VisibilityOff from "../../images/visibility-off.svg";
-import EmojiLady2 from "../../images/emojiLady2.png"
+
 import '../../styles/auth.styles.css';
-import NotificationModal from "../../components/notificationModal";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PasswordInput from "../../components/passwordInput";
 import { apiPost } from '../../services/apiService' ;
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 //import { setUserData } from "../../store/slices/userSlice";
 import { setToken, getUserData, setUserData } from "../../services/localStorageService";
+import { setMessage } from '../../store/slices/notificationMessagesSlice';
+import { Spinner } from '../../components/spinner';
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.user.userData);
-  const [showNotification, setShowNotification] = useState(false);
+  //const [showNotification, setShowNotification] = useState(false);
   const [postingData, setPostingData] = useState()
-
-
-
   useEffect(()=>{
     let data = getUserData()
     if(data){
@@ -49,13 +45,23 @@ const Login = () => {
         const {token, user} = res.payload
         const {firstName, lastName, middleName, staffCadre, id, companyId, companyName} = user;
         setUserData(JSON.stringify({token, id, firstName, lastName, middleName, staffCadre, companyId, companyName}))
-        //dispatch(setUserData(res.payload))
-        //setToken(res.payload.token)
-        console.log(res);
+        dispatch(
+          setMessage({
+            severity: "success",
+            message: res.message,
+            key: Date.now(),
+          })
+        );
       })
       .catch((error) => {
         setPostingData(false);
-        console.log(error);
+        dispatch(
+          setMessage({
+            severity: "error",
+            message: error.message,
+            key: Date.now(),
+          })
+        );
       });
   }
 
@@ -91,14 +97,12 @@ const Login = () => {
                   </div>
                   <a href="/forgotPassword" className="textPurple ms-auto">Forgot Password?</a>
                 </div>
-                <button className="btn btnPurple w-100 mt-5" disabled={postingData} onClick={handleSubmit}>Log In</button>
+                <button className="btn btnPurple w-100 mt-5" disabled={postingData} onClick={handleSubmit}>{postingData ? <Spinner /> : "Submit"}</button>
               </form>
             </section>
           </div>
         </div>
       </div>
-
-      {showNotification && <NotificationModal img={EmojiLady2} open={showNotification} onClose={() => setShowNotification(false)} />}
     </>
   )
 }

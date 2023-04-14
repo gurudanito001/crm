@@ -10,6 +10,9 @@ import { Spinner } from '../../../components/spinner';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import ListItem from '../../../components/listItem';
 import convertMinutes from '../../../services/convertToMinsHours';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 const CustomerVisitDetailListItem = ({title, description}) =>{
   return(
@@ -22,14 +25,24 @@ const CustomerVisitDetailListItem = ({title, description}) =>{
 
 
 const CustomerVisitDetails = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [currentScreen, setCurrentScreen] = useState("details")
   const { id } = useParams();
+  const {staffCadre} = getUserData();
   const [visitReport, setVisitReport] = useState({});
   const customerVisitDetailsQuery = useQuery({
     queryKey: ["allCustomerVisits", id],
     queryFn: () => apiGet({url: `/customerVisit/${id}`}).then( (res) =>{ 
       return res.payload
+    }).catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
     }),
     onSuccess: (data) =>{
       if(data.visitReportId){
@@ -74,7 +87,8 @@ const CustomerVisitDetails = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>Customer Visit Details</h3>
-          <div className="btn-group">
+          { staffCadre !== "Administrator" &&
+            <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={customerVisitDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
             </button>
@@ -82,7 +96,7 @@ const CustomerVisitDetails = () => {
               {<li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={customerVisitDetailsQuery?.isLoading} style={{ height: "40px" }} onClick={() => setCurrentScreen("editDetails")}>Edit</button></li>}
               { !customerVisitDetailsQuery?.data?.visitReportId && <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={customerVisitDetailsQuery?.isLoading} style={{ height: "40px" }} onClick={() => navigate("/app/visit/report", { state: { customerVisitId: id } })}>Add Visit Report</button></li>}
             </ul>
-          </div>
+          </div>}
         </header>
         <p>Details of customer visit listed below</p>
 

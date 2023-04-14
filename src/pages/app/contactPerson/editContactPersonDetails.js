@@ -4,9 +4,12 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import NaijaStates from 'naija-state-local-government';
 import industries from 'industries';
 import { Spinner } from '../../../components/spinner';
+import formValidator from "../../../services/validation";
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 const EditContactPersonDetails = ({ data, handleCancel }) => {
-
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     employeeId: "",
@@ -22,13 +25,29 @@ const EditContactPersonDetails = ({ data, handleCancel }) => {
     role: ""
   });
 
+  const [errors, setErrors] = useState({})
+
   const queryClient = useQueryClient();
   const contactPersonDetailsMutation = useMutation({
-    mutationFn: () => apiPut({ url: `/contactPerson/${data.id}`, data: formData }).then(res => console.log(res)),
-    onSuccess: () => {
+    mutationFn: () => apiPut({ url: `/contactPerson/${data.id}`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allContactPersons"])
       handleCancel()
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
   useEffect(() => {
     console.log(data)
@@ -38,29 +57,20 @@ const EditContactPersonDetails = ({ data, handleCancel }) => {
     }))
   }, [])
 
-  /*   const listStateOptions = () =>{
-      return NaijaStates.states().map(state =>
-        <option key={state} value={state}>{state}</option>
-      )
-    }
-    const listLgaOptions = (state) =>{
-      if(state){
-        return NaijaStates.lgas(state).lgas.map(lga =>
-          <option key={lga} value={lga}>{lga}</option>
-        )
-      }
-    } */
-
-  /*   const listIndustryOptions = () =>{
-        return Object.keys(industries).map(industry =>
-          <option key={industry} value={industry}>{industry}</option>
-        )
-    } */
 
   const customerQuery = useQuery({
     queryKey: ["allCustomers"],
-    queryFn: () => apiGet({ url: "/customer" }).then((res) => res.payload),
-    onSuccess: () => console.log(customerQuery.data)
+    queryFn: () => apiGet({ url: "/customer" })
+    .then((res) => res.payload)
+    .catch(error => {
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listCustomerOptions = () => {
@@ -83,10 +93,25 @@ const EditContactPersonDetails = ({ data, handleCancel }) => {
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors(prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    let errors = formValidator(["customerId", "firstName", "lastName", "phoneNumber1"], formData);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     //return console.log(formData)
     contactPersonDetailsMutation.mutate();
   }
@@ -104,18 +129,22 @@ const EditContactPersonDetails = ({ data, handleCancel }) => {
             <option value="">Select Customer</option>
             {!customerQuery.isLoading && listCustomerOptions()}
           </select>
+          <span className='text-danger font-monospace small'>{errors.customerId}</span>
         </div>
         <div className="mb-3">
           <label htmlFor="firstName" className="form-label">First Name (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="text" onChange={handleChange("firstName")} value={formData.firstName} className="form-control shadow-none" id="firstName" placeholder="Contact Person First Name" />
+          <span className='text-danger font-monospace small'>{errors.firstName}</span>
         </div>
         <div className="mb-3">
           <label htmlFor="lastName" className="form-label">Last Name (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="text" onChange={handleChange("lastName")} value={formData.lastName} className="form-control shadow-none" id="lastName" placeholder="Contact Person Last Name" />
+          <span className='text-danger font-monospace small'>{errors.lastName}</span>
         </div>
         <div className="mb-3">
           <label htmlFor="email" className="form-label">Email</label>
           <input type="email" onChange={handleChange("email")} value={formData.email} className="form-control shadow-none" id="email" placeholder="Contact Person Email" />
+          <span className='text-danger font-monospace small'>{errors.email}</span>
         </div>
         <div className="mb-3">
           <label htmlFor="role" className="form-label">Role</label>
@@ -133,6 +162,7 @@ const EditContactPersonDetails = ({ data, handleCancel }) => {
         <div className="mb-3">
           <label htmlFor="phoneNumber1" className="form-label">Phone Number 1 (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="tel" onChange={handleChange("phoneNumber1")} value={formData.phoneNumber1} className="form-control shadow-none" id="phoneNumber1" placeholder="Phone Number 1" />
+          <span className='text-danger font-monospace small'>{errors.phoneNumber1}</span>
         </div>
         <div className="mb-3">
           <label htmlFor="phoneNumber2" className="form-label">Phone Number 2</label>

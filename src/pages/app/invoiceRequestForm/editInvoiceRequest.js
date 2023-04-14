@@ -5,11 +5,14 @@ import { apiPost, apiGet, apiPut } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import Compress from "react-image-file-resizer";
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 
 const EditInvoiceRequestDetails = ({data, handleCancel}) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     invoiceName: "",
     address1: "",
@@ -49,17 +52,33 @@ const EditInvoiceRequestDetails = ({data, handleCancel}) => {
     additionalInformation: "",
   });
 
+  const [errors, setErrors] = useState({})
+
   const [ selectedFile, setSelectedFile] = useState("");
   const [ imageUrl, setImageUrl] = useState("");
   const [ base64Image, setBase64Image ] = useState("");
 
   const queryClient = useQueryClient();
   const invoiceRequestDetailsMutation = useMutation({
-    mutationFn: (data)=> apiPut({ url: `/invoiceRequestForm/${data.id}`, data }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: (data)=> apiPut({ url: `/invoiceRequestForm/${data.id}`, data }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allInvoiceRequests"])
       handleCancel()
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   useEffect(()=>{
@@ -93,6 +112,10 @@ const EditInvoiceRequestDetails = ({data, handleCancel}) => {
     setFormData(prevState => ({
       ...prevState,
       [prop]: event.target.value
+    }))
+    setErrors( prevState => ({
+      ...prevState,
+      [prop]: ""
     }))
   }
 
@@ -157,7 +180,7 @@ const EditInvoiceRequestDetails = ({data, handleCancel}) => {
             <input type="text" className="form-control shadow-none" value={formData.businessType} onChange={handleChange("businessType")} id="businessType" placeholder="Business Type" />
           </div>
           <div className="mb-3">
-            <label htmlFor="kycId" className="form-label">KYC Id</label>
+            <label htmlFor="kycId" className="form-label">KYC Id (Customer Code)</label>
             <input type="text" className="form-control shadow-none" value={formData.kycId} onChange={handleChange("kycId")} id="kycId" placeholder="KYC Id" />
           </div>
           <div className="mb-3">
@@ -165,7 +188,7 @@ const EditInvoiceRequestDetails = ({data, handleCancel}) => {
             <input type="text" className="form-control shadow-none" value={formData.vehicleBrand} onChange={handleChange("vehicleBrand")} id="vehicleBrand" placeholder="Vehicle Details" />
           </div>
           <div className="mb-3">
-            <label htmlFor="vehicleModel" className="form-label">Vehicle Model</label>
+            <label htmlFor="vehicleModel" className="form-label">Vehicle Details (Model)</label>
             <input type="text" className="form-control shadow-none" value={formData.vehicleModel} onChange={handleChange("vehicleModel")} id="vehicleModel" placeholder="Vehicle Details" />
           </div>
           <div className="mb-3">
@@ -185,7 +208,7 @@ const EditInvoiceRequestDetails = ({data, handleCancel}) => {
             <input type="text" className="form-control shadow-none" value={formData.typeOfBodyBuilding} onChange={handleChange("typeOfBodyBuilding")} id="typeOfBodyBuilding" placeholder="Type of Body Building" />
           </div>
           <div className="mb-3">
-            <label htmlFor="bodyFabricatorName" className="form-label">Body Fabricator Name</label>
+            <label htmlFor="bodyFabricatorName" className="form-label">Body Fabricator Name (If any)</label>
             <input type="text" className="form-control shadow-none" value={formData.bodyFabricatorName} onChange={handleChange("bodyFabricatorName")} id="bodyFabricatorName" placeholder="Body Fabricator Name" />
           </div>
           <div className="mb-3">
@@ -193,14 +216,14 @@ const EditInvoiceRequestDetails = ({data, handleCancel}) => {
             <input type="date" className="form-control shadow-none" value={formData.expectedDeliveryDate} onChange={handleChange("expectedDeliveryDate")} id="deliveryDate" />
           </div>
           <div className="mb-3">
-            <label htmlFor="deliveryLocation" className="form-label">Delivery Location</label>
+            <label htmlFor="deliveryLocation" className="form-label">Delivery Location (address)</label>
             <textarea className="form-control shadow-none" value={formData.deliveryLocation} onChange={handleChange("deliveryLocation")} id="deliveryLocation" rows={3}></textarea>
           </div>
           <div className="form-check mb-3">
-            <input className="form-check-input shadow-none" checked={formData.registration} onChange={handleCheck("registration")} type="checkbox" id="registration" />
             <label className="form-check-label" htmlFor="registration">
               Registration
             </label>
+            
           </div>
           <div className="mb-3">
             <label htmlFor="deliveryBy" className="form-label">Delivery By</label>

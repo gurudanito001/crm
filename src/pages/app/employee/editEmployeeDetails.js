@@ -7,36 +7,96 @@ import { useNavigate } from "react-router-dom";
 import { apiPost, apiGet, apiPut } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import formValidator from '../../../services/validation';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 const EditEmployeeDetails = ({ handleCancel, data }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+
   const queryClient = useQueryClient();
   const employeeDetailsMutation = useMutation({
-    mutationFn: () => apiPut({ url: `/employee/${data.id}`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () => {
+    mutationFn: () => apiPut({ url: `/employee/${data.id}`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allEmployees"])
       handleCancel();
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const companyQuery = useQuery({
     queryKey: ["allCompanies"],
-    queryFn: () => apiGet({ url: "/company" }).then((res) => res.payload),
+    queryFn: () => apiGet({ url: "/company" })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const employeeQuery = useQuery({
     queryKey: ["allEmployees"],
-    queryFn: () => apiGet({ url: "/employee" }).then((res) => res.payload)
+    queryFn: () => apiGet({ url: "/employee" })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const branchQuery = useQuery({
     queryKey: ["allBranchess"],
-    queryFn: () => apiGet({ url: "/branch" }).then((res) => res.payload)
+    queryFn: () => apiGet({ url: "/branch" })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const productGroupQuery = useQuery({
     queryKey: ["allProductGroups"],
-    queryFn: () => apiGet({ url: "/productGroup" }).then((res) => res.payload)
+    queryFn: () => apiGet({ url: "/productGroup" })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
 
@@ -57,6 +117,8 @@ const EditEmployeeDetails = ({ handleCancel, data }) => {
     employmentDate: "",
     brandsAssigned: [],
   });
+
+  const [errors, setErrors] = useState({})
 
   useEffect(()=>{
     setFormData( prevState => ({
@@ -85,6 +147,10 @@ const EditEmployeeDetails = ({ handleCancel, data }) => {
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
+    }))
+    setErrors(prevState =>({
+      ...prevState,
+      [props]: ""
     }))
   }
 
@@ -159,6 +225,17 @@ const EditEmployeeDetails = ({ handleCancel, data }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    let errors = formValidator(["companyId", "branchId", "staffCadre", "firstName", "lastName", "email", "brandsAssigned"], formData);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     //return console.log(formData)
     employeeDetailsMutation.mutate();
   }
@@ -171,43 +248,49 @@ const EditEmployeeDetails = ({ handleCancel, data }) => {
 
       <form className="mt-5">
         <div className="mb-3">
-          <label htmlFor="company" className="form-label">Company</label>
+          <label htmlFor="company" className="form-label">Company (<span className='fst-italic text-warning'>required</span>)</label>
           <select className="form-select shadow-none" id="company" onChange={handleChange("companyId")} value={formData.companyId} aria-label="Default select example">
             <option value="">Select Company</option>
             {!companyQuery.isLoading && listCompanyOptions()}
           </select>
+          <span className='text-danger font-monospace small'>{errors.companyId}</span> 
         </div>
         <div className="mb-3">
-          <label htmlFor="branch" className="form-label">Branch</label>
+          <label htmlFor="branch" className="form-label">Branch (<span className='fst-italic text-warning'>required</span>)</label>
           <select className="form-select shadow-none" id="branch" onChange={handleChange("branchId")} value={formData.branchId} aria-label="Default select example">
             <option value="">Select Branch</option>
             {!branchQuery.isLoading && listBranchOptions()}
           </select>
+          <span className='text-danger font-monospace small'>{errors.branchId}</span> 
         </div>
         <div className="mb-3">
-          <label htmlFor="staffCadre" className="form-label">Staff Cadre</label>
+          <label htmlFor="staffCadre" className="form-label">Staff Cadre (<span className='fst-italic text-warning'>required</span>)</label>
           <select className="form-select shadow-none" id="staffCadre" onChange={handleChange("staffCadre")} value={formData.staffCadre} aria-label="Default select example">
             <option value="">Select Staff Cadre</option>
             <option value="Administrator">Administrator</option>
             <option value="Supervisor">Supervisor</option>
             <option value="Sales Representative">Sales Representative</option>
           </select>
+          <span className='text-danger font-monospace small'>{errors.staffCadre}</span> 
         </div>
         <div className="mb-3">
-          <label htmlFor="firstname" className="form-label">First Name</label>
+          <label htmlFor="firstname" className="form-label">First Name (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="text" className="form-control shadow-none" id="firstname" onChange={handleChange("firstName")} value={formData.firstName} placeholder="Employee First Name" />
+          <span className='text-danger font-monospace small'>{errors.firstName}</span> 
         </div>
         <div className="mb-3">
           <label htmlFor="middlename" className="form-label">Middle Name</label>
           <input type="text" className="form-control shadow-none" id="middlename" onChange={handleChange("middleName")} value={formData.middleName} placeholder="Employee Middle Name" />
         </div>
         <div className="mb-3">
-          <label htmlFor="lastname" className="form-label">Last Name</label>
+          <label htmlFor="lastname" className="form-label">Last Name (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="text" className="form-control shadow-none" id="lastname" onChange={handleChange("lastName")} value={formData.lastName} placeholder="Employee Last Name" />
+          <span className='text-danger font-monospace small'>{errors.lastName}</span> 
         </div>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email Address</label>
+          <label htmlFor="email" className="form-label">Email Address (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="email" className="form-control shadow-none" id="email" onChange={handleChange("email")} value={formData.email} placeholder="Enter your email address" />
+          <span className='text-danger font-monospace small'>{errors.email}</span> 
         </div>
         <div className="mb-3">
           <label htmlFor="supervisor" className="form-label">Supervisor</label>
@@ -235,8 +318,9 @@ const EditEmployeeDetails = ({ handleCancel, data }) => {
           <input type="date" className="form-control shadow-none" id="employmentDate" onChange={handleChange("employmentDate")} value={formData.employmentDate} placeholder="Enter Employee Employment Date" />
         </div>
         <div className="mb-3">
-          <label htmlFor="brandsAssigned" className="form-label">Brands</label>
+          <label htmlFor="brandsAssigned" className="form-label">Brands (<span className='fst-italic text-warning'>required</span>)</label>
           {!productGroupQuery.isLoading && listBrands()}
+          <span className='text-danger font-monospace small'>{errors.brandsAssigned}</span> 
         </div>
         <div className="d-flex mt-5">
           <button className="btn btnPurple m-0 px-5" disabled={employeeDetailsMutation.isLoading} onClick={handleSubmit}>{employeeDetailsMutation.isLoading ? <Spinner /> : "Submit"}</button>

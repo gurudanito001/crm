@@ -3,10 +3,13 @@ import { apiPut } from '../../../services/apiService';
 import { useMutation, useQueryClient } from "@tanstack/react-query" 
 import { useNavigate } from "react-router";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const EditProductGroupDetails = ({ data, handleCancel }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     code: "",
@@ -14,13 +17,29 @@ const EditProductGroupDetails = ({ data, handleCancel }) => {
     description: ""
   })
 
+  const [errors, setErrors] = useState({})
+
   const queryClient = useQueryClient();
   const productGroupDetailsMutation = useMutation({
-    mutationFn: ()=> apiPut({ url: `/productGroup/${data.id}`, data: formData }).then(res => console.log(res)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiPut({ url: `/productGroup/${data.id}`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allProductGroups", data.id])
       handleCancel()
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   useEffect(()=>{
@@ -34,6 +53,10 @@ const EditProductGroupDetails = ({ data, handleCancel }) => {
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
+    }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
     }))
   }
 

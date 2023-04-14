@@ -1,6 +1,6 @@
 
 
-const ListItem = ({title, onClick, description, sideInfo, icon}) =>{
+const ListItem = ({title, onClick, description, sideInfo, extraInfo, icon}) =>{
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={onClick}>
       <div className='w-75 d-flex align-items-center pe-2'>
@@ -10,8 +10,9 @@ const ListItem = ({title, onClick, description, sideInfo, icon}) =>{
           <span>{description}</span>
         </article>
       </div>
-      <div className='w-25 d-flex align-items-center'>
+      <div className='w-25 d-flex flex-column justify-content-center'>
         <span className='small'>{sideInfo}</span>
+        <span className="text-success fw-bold">{extraInfo}</span>
       </div>
     </li>
   )

@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 
@@ -29,10 +32,23 @@ const ProductGroupListItem = ({id, name, code, description}) =>{
 
 
 const AllProductGroups = () => {
+  const dispatch = useDispatch();
+  let userData = getUserData();
+
 
   const productGroupQuery = useQuery({
     queryKey: ["allProductGroups"],
-    queryFn: () => apiGet({url: "/productGroup"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/productGroup"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listAllProductGroups = () =>{
@@ -50,7 +66,9 @@ const AllProductGroups = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Product Groups</h3>
-          <a href='/app/prodGroup/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          { userData.staffCadre === "Administrator" &&
+            <a href='/app/prodGroup/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          }
         </header>
         <p>All your Product Groups are listed below</p>
         {productGroupQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
@@ -62,7 +80,7 @@ const AllProductGroups = () => {
           {!productGroupQuery.isLoading && !productGroupQuery.isError && productGroupQuery?.data?.length === 0 && 
           <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Product Group was found !!</p>
-              <span className='text-info'>Click the [+Add] button to add a new Product Group</span>
+              { userData.staffCadre === "Administrator" && <span className='text-info'>Click the [+Add] button to add a new Product Group</span>}
           </div>}
         </ul>
       </section>

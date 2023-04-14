@@ -9,6 +9,9 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import formatAsCurrency from '../../../services/formatAsCurrency';
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 const PfiRequestDetailListItem = ({title, description}) =>{
   return(
@@ -23,13 +26,24 @@ const PfiRequestDetailListItem = ({title, description}) =>{
 const PfiRequestDetails = () => {
   const [currentScreen, setCurrentScreen] = useState("details")
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { id } = useParams();
+  const {staffCadre} = getUserData();
 
   const pfiRequestDetailsQuery = useQuery({
     queryKey: ["allPfiRequests", id],
-    queryFn: () => apiGet({url: `/pfiRequestForm/${id}`}).then( (res) => res.payload),
-    onSuccess: () =>{ console.log(pfiRequestDetailsQuery.data)}
+    queryFn: () => apiGet({url: `/pfiRequestForm/${id}`})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   return (
@@ -38,6 +52,9 @@ const PfiRequestDetails = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>PFI Request Details</h3>
+
+          {
+            staffCadre !== "Administrator" && 
           <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={pfiRequestDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
@@ -46,6 +63,7 @@ const PfiRequestDetails = () => {
               <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={pfiRequestDetailsQuery.isLoading} style={{ height: "40px" }} onClick={() => setCurrentScreen("editDetails")}>Edit</button></li>
             </ul>
           </div>
+          }
         </header>
         <p>Details of PFI request listed below</p>
 
@@ -59,7 +77,6 @@ const PfiRequestDetails = () => {
           <PfiRequestDetailListItem title="Company Address" description={pfiRequestDetailsQuery.data.companyAddress || "----"} />
           <PfiRequestDetailListItem title="Contact Person" description={pfiRequestDetailsQuery.data.contactPerson || "----"} />
           <PfiRequestDetailListItem title="Phone Number" description={pfiRequestDetailsQuery.data.mobile || "----"} />
-          <PfiRequestDetailListItem title="Designation" description={pfiRequestDetailsQuery.data.designation || "----"} />
           <PfiRequestDetailListItem title="Email Address" description={pfiRequestDetailsQuery.data.emailAddress || "----"} />
           <PfiRequestDetailListItem title="Product Brand" description={pfiRequestDetailsQuery.data.productBrand || "----"} />
           <PfiRequestDetailListItem title="Vehicle Model" description={pfiRequestDetailsQuery.data.vehicleModel || "----"} />
@@ -70,9 +87,10 @@ const PfiRequestDetails = () => {
           <PfiRequestDetailListItem title="VAT Deduction" description={`${pfiRequestDetailsQuery.data.vatDeduction}` || "----"} />
           <PfiRequestDetailListItem title="WHT Deduction" description={`${pfiRequestDetailsQuery.data.whtDeduction}` || "----"} />
           <PfiRequestDetailListItem title="Registration" description={`${pfiRequestDetailsQuery.data.registration}` || "----"} />
-          <PfiRequestDetailListItem title="Refund/Rebase Amount" description={formatAsCurrency(pfiRequestDetailsQuery.data.refundRebaseAmount) || "----"} />
-          <PfiRequestDetailListItem title="Refund/Rebase Recipient" description={pfiRequestDetailsQuery.data.refundRebaseRecipient || "----"} />
+          <PfiRequestDetailListItem title="Refund / Rebate Amount" description={formatAsCurrency(pfiRequestDetailsQuery.data.refundRebaseAmount) || "----"} />
+          <PfiRequestDetailListItem title="Refund / Rebate Recipient" description={pfiRequestDetailsQuery.data.refundRebaseRecipient || "----"} />
           <PfiRequestDetailListItem title="Relationship with Transaction" description={pfiRequestDetailsQuery.data.relationshipWithTransaction || "----"} />
+          <PfiRequestDetailListItem title="Designation" description={pfiRequestDetailsQuery.data.designation || "----"} />
           <PfiRequestDetailListItem title="Estimated Order Closing Time" description={pfiRequestDetailsQuery.data.estimatedOrderClosingTime || "----"} />
           <PfiRequestDetailListItem title="Delivery Period" description={pfiRequestDetailsQuery.data.deliveryPeriod || "----"} />
           <PfiRequestDetailListItem title="Payment Type" description={pfiRequestDetailsQuery.data.paymentType || "----"} />

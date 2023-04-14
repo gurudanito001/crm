@@ -1,10 +1,13 @@
 
 import { useState } from "react";
 import Layout from "../../../components/layout";
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 
 const EditVisitPlanDetails = ({handleCancel}) => {
+  const dispatch = useDispatch();
   const [showNotification, setShowNotification] = useState(false);
   return (
     <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>

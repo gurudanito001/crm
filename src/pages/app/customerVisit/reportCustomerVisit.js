@@ -6,9 +6,13 @@ import { apiGet, apiPost } from '../../../services/apiService';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from '../../../services/formatAsCurrency';
+import formValidator from '../../../services/validation';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const ReportCustomerVisit = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const {state} = useLocation();
 
@@ -26,25 +30,59 @@ const ReportCustomerVisit = () => {
     nextVisitTime: ""
   })
 
+  const [errors, setErrors] = useState({});
+
   const queryClient = useQueryClient();
   const customerVisitReportMutation = useMutation({
-    mutationFn: ()=> apiPost({ url: `/customerVisitReport/create`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiPost({ url: `/customerVisitReport/create`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allCustomerVisit"])
       navigate("/app/visit/")
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const customerVisitQuery = useQuery({
     queryKey: ["allCustomerVisits"],
-    queryFn: () => apiGet({url: "/customerVisit"}).then( (res) => res.payload),
-    onSuccess: () => console.log(customerVisitQuery.data)
+    queryFn: () => apiGet({url: "/customerVisit"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const productsQuery = useQuery({
     queryKey: ["allProducts"],
-    queryFn: () => apiGet({url: "/product"}).then( (res) => res.payload),
-    onSuccess: () => console.log(productsQuery.data)
+    queryFn: () => apiGet({url: "/product"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   useEffect(()=>{
@@ -125,10 +163,25 @@ const ReportCustomerVisit = () => {
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
   }
 
   const handleSubmit = (e) =>{
     e.preventDefault()
+    let errors = formValidator(["customerVisitId", "callType", "status", "productsDiscussed", "quantity", "durationOfMeeting", "meetingOutcome"], formData);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     // return console.log(formData)
     customerVisitReportMutation.mutate();
   }
@@ -140,24 +193,26 @@ const ReportCustomerVisit = () => {
         <p>Report a Customer Visit.</p>
           <form className="mt-5">
           <div className="mb-3">
-            <label htmlFor="companyName" className="form-label">Scheduled Customer Visit</label>
+            <label htmlFor="companyName" className="form-label">Scheduled Customer Visit (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" id="customerVisitId" value={formData.customerVisitId} onChange={handleChange("customerVisitId")} aria-label="Default select example">
               <option value="">Select Scheduled Customer Visit</option>
               {listCustomerVisitOptions()}
-            </select>          
+            </select>   
+            <span className='text-danger font-monospace small'>{errors.customerVisitId}</span>         
           </div>
 
           <div className="mb-3">
-            <label htmlFor="callType" className="form-label">Call Type</label>
+            <label htmlFor="callType" className="form-label">Call Type (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" id="callType" value={formData.callType} onChange={handleChange("callType")} aria-label="Default select example">
               <option value="">Select Call Type</option>
               <option value="telephone">Telephone</option>
               <option value="in-person">In-Person</option>
-            </select>          
+            </select> 
+            <span className='text-danger font-monospace small'>{errors.callType}</span>           
           </div>
 
           <div className="mb-3">
-            <label htmlFor="status" className="form-label">Status</label>
+            <label htmlFor="status" className="form-label">Status (<span className='fst-italic text-warning'>required</span>)</label>
             <div className='d-flex align-items-center'>
               <select className="form-select shadow-none" id="status" value={formData.status} onChange={handleChange("status")} aria-label="Default select example">
                 <option value="">Select Status Type</option>
@@ -169,14 +224,16 @@ const ReportCustomerVisit = () => {
               </select> 
               <input type="text" className="form-control shadow-none ms-2" id="customStatus" value={formData.status} onChange={handleChange("status")} placeholder="Enter Custom Status" />
             </div>
+            <span className='text-danger font-monospace small'>{errors.status}</span>  
           </div>
 
           <div className="mb-3">
-            <label htmlFor="productsDiscussed" className="form-label">Product Discussed</label>
+            <label htmlFor="productsDiscussed" className="form-label">Product Discussed (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" id="productsDiscussed" multiple={true} value={formData.productsDiscussed} onChange={handleChange("productsDiscussed")} aria-label="Default select example">
               <option value="">Select Product Discussed</option>
               {!productsQuery.isLoading && listProducts()}
             </select> 
+            <span className='text-danger font-monospace small'>{errors.productsDiscussed}</span>  
 
             {formData.productsDiscussed.length > 0 &&
             <div className='my-2'>
@@ -191,12 +248,13 @@ const ReportCustomerVisit = () => {
           </div> */}
 
           <div className="mb-3">
-            <label htmlFor="quantity" className="form-label">Quantity</label>
+            <label htmlFor="quantity" className="form-label">Quantity (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="number" className="form-control shadow-none" id="quantity" value={formData.quantity} onChange={handleChange("quantity")}  placeholder="Enter Product Quantity" />
+            <span className='text-danger font-monospace small'>{errors.quantity}</span>  
           </div>
           
           <div className="mb-3">
-            <label htmlFor="durationOfMeeting" className="form-label">Duration Of Meeting</label>
+            <label htmlFor="durationOfMeeting" className="form-label">Duration Of Meeting (<span className='fst-italic text-warning'>required</span>)</label>
             <div className='d-flex align-items-center'>
               <select className="form-select shadow-none" id="durationOfMeeting" value={formData.durationOfMeeting} onChange={handleChange("durationOfMeeting")} aria-label="Default select example">
                 <option value="">Select Meeting Duration</option>
@@ -210,11 +268,13 @@ const ReportCustomerVisit = () => {
                 <option value="240">4hrs</option>
               </select> 
             </div>
+            <span className='text-danger font-monospace small'>{errors.durationOfMeeting}</span>  
           </div>
 
           <div className="mb-3">
-            <label htmlFor="meetingOutcome" className="form-label">Meeting Outcome</label>
+            <label htmlFor="meetingOutcome" className="form-label">Meeting Outcome (<span className='fst-italic text-warning'>required</span>)</label>
             <textarea className="form-control shadow-none" value={formData.meetingOutcome} onChange={handleChange("meetingOutcome")} id="meetingOutcome" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.meetingOutcome}</span>  
           </div>
 
           <div className="form-check mb-3">

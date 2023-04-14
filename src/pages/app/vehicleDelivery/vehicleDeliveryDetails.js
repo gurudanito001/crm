@@ -9,6 +9,9 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import formatAsCurrency from '../../../services/formatAsCurrency';
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 const VehicleDeliveryDetailListItem = ({id, title, description}) =>{
   return(
@@ -22,14 +25,25 @@ const VehicleDeliveryDetailListItem = ({id, title, description}) =>{
 
 const VehicleDeliveryDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const [currentScreen, setCurrentScreen] = useState("details");
+  let {staffCadre} = getUserData();
 
   const vehicleDeliveryDetailsQuery = useQuery({
     queryKey: ["allVehicleDeliveries", id],
-    queryFn: () => apiGet({url: `/vehicleDelivery/${id}`}).then( (res) => res.payload),
-    onSuccess: () =>{ console.log(vehicleDeliveryDetailsQuery.data)}
+    queryFn: () => apiGet({url: `/vehicleDelivery/${id}`})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
 
@@ -40,6 +54,7 @@ const VehicleDeliveryDetails = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>Vehicle Delivery Details</h3>
+          {staffCadre === "Administrator" && <>
           <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={vehicleDeliveryDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
@@ -49,6 +64,7 @@ const VehicleDeliveryDetails = () => {
               {/* <li><button className='btn btn-sm btn-light text-danger fw-bold w-100'  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">delete</button></li> */}
             </ul>
           </div>
+          </>}
         </header>
         <p>Details of vehicle delivery listed below</p>
 
@@ -79,7 +95,6 @@ const VehicleDeliveryDetails = () => {
         <EditVehicleDeliveryDetails data={vehicleDeliveryDetailsQuery.data} handleCancel={()=>setCurrentScreen("details")} />
       }
     </Layout>
-
   )
 }
 

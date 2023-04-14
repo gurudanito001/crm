@@ -7,23 +7,53 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import Compress from "react-image-file-resizer";
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from '../../../services/formatAsCurrency';
+import formValidator from '../../../services/validation';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {state} = useLocation();
+
   const queryClient = useQueryClient();
   const productMutation = useMutation({
-    mutationFn: (data)=> apiPost({ url: `/product/create`, data }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: (data)=> apiPost({ url: `/product/create`, data }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allProducts"])
       navigate("/app/product")
-    }
+    }).catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const productGroupQuery = useQuery({
     queryKey: ["allProductGroups"],
-    queryFn: () => apiGet({url: "/productGroup"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/productGroup"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listProductGroupOptions = () =>{
@@ -48,6 +78,8 @@ const AddProduct = () => {
     vatRate: "",
     extraData: {}
   });
+  
+  const [errors, setErrors] = useState({})
 
   const [ selectedFile, setSelectedFile] = useState("");
   const [ imageUrl, setImageUrl] = useState([]);
@@ -142,10 +174,13 @@ const AddProduct = () => {
   }
 
   const handleChange = (props) => (event) =>{
-
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
+    }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
     }))
   }
 
@@ -153,11 +188,20 @@ const AddProduct = () => {
     e.preventDefault()
     let data = formData;
     data.images = base64Image;
+    let errors = formValidator(["code", "name", "description", "productGroupId", "price", "images"], data);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     //return console.log(data);
     productMutation.mutate(data)
   }
-
-
 
 
   return (
@@ -168,26 +212,30 @@ const AddProduct = () => {
 
         <form className="mt-5">
           <div className="mb-3">
-            <label htmlFor="productGroup" className="form-label">Product Group</label>
+            <label htmlFor="productGroup" className="form-label">Product Group (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" value={formData.productGroupId} onChange={handleChange("productGroupId")} id="productGroup" aria-label="Default select example">
               <option value="">Select Product Group</option>
               {!productGroupQuery.isLoading && listProductGroupOptions()}
             </select>
+            <span className='text-danger font-monospace small'>{errors.productGroupId}</span>
           </div>
 
           <div className="mb-3">
-            <label htmlFor="productName" className="form-label">Product Name</label>
+            <label htmlFor="productName" className="form-label">Product Name (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" className="form-control shadow-none" value={formData.name} onChange={handleChange("name")} id="productName" placeholder="Product Name" />
+            <span className='text-danger font-monospace small'>{errors.name}</span>
           </div>
 
           <div className="mb-3">
-            <label htmlFor="productCode" className="form-label">Product Code</label>
+            <label htmlFor="productCode" className="form-label">Product Code (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" className="form-control shadow-none" value={formData.code} onChange={handleChange("code")} id="productCode" placeholder="Product Code" />
+            <span className='text-danger font-monospace small'>{errors.code}</span>
           </div>
 
           <div className="mb-3">
-            <label htmlFor="productDescription" className="form-label">Product Description </label>
+            <label htmlFor="productDescription" className="form-label">Product Description (<span className='fst-italic text-warning'>required</span>)</label>
             <textarea className="form-control shadow-none" value={formData.description} onChange={handleChange("description")} id="productDescription" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.description}</span>
           </div>
           
           <div className="mb-3">
@@ -206,10 +254,11 @@ const AddProduct = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="brochure" className="form-label">Images</label>
+            <label htmlFor="brochure" className="form-label">Images (<span className='fst-italic text-warning'>required</span>)</label>
             <div className='d-flex align-items-center'>
               <input className="form-control form-control-lg shadow-none"  id="brochure" onChange={uploadImage} type="file" />
             </div>
+            <span className='text-danger font-monospace small'>{errors.images}</span>
 
             {imageUrl.length !== 0 &&
             <div className='my-2'>
@@ -219,10 +268,11 @@ const AddProduct = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="productType" className="form-label">Price Of Product <span className='ms-3 fw-bold'>{formatAsCurrency(formData.price)}</span></label>
+            <label htmlFor="productType" className="form-label">Price Of Product (<span className='fst-italic text-warning'>required</span>) <span className='ms-2 fw-bold'>{formatAsCurrency(formData.price)}</span> </label>
             <div className='d-flex align-items-center'>
               <input type="text" className="form-control shadow-none" value={formData.price} onChange={handleChange("price")} id="productPrice" placeholder="Price" />
             </div>
+            <span className='text-danger font-monospace small'>{errors.price}</span>
           </div>
 
           <div className="form-check form-switch mb-3">

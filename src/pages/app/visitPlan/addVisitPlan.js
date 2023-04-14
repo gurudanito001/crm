@@ -6,18 +6,35 @@ import { apiPost } from '../../../services/apiService';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import { getUserData } from '../../../services/localStorageService';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const AddVisitPlan = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const queryClient = useQueryClient();
   const visitPlanMutation = useMutation({
-    mutationFn: ()=> apiPost({ url: `/visitPlan/create`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiPost({ url: `/visitPlan/create`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allVisitPlans"])
       navigate("/app/plan")
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const [formData, setFormData] = useState({
@@ -26,6 +43,8 @@ const AddVisitPlan = () => {
     monthlyVisitPlan: "",
     extraData: {}
   });
+
+  const [errors, setErrors] = useState({})
 
   useEffect(()=>{
     let userData = getUserData();
@@ -40,6 +59,10 @@ const AddVisitPlan = () => {
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
+    }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
     }))
   }
 

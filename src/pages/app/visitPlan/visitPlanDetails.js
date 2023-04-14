@@ -3,6 +3,8 @@ import '../../../styles/auth.styles.css';
 import { useState } from "react";
 import Layout from "../../../components/layout";
 import EditVisitPlanDetails from './editVisitPlanDetails';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 const VisitPlanDetailListItem = () =>{
   return(
@@ -16,6 +18,7 @@ const VisitPlanDetailListItem = () =>{
 
 const VisitPlanDetails = () => {
   const [currentScreen, setCurrentScreen] = useState("details")
+  const dispatch = useDispatch();
 
   return (
     <Layout>

@@ -7,11 +7,20 @@ import formatAsCurrency from '../../../services/formatAsCurrency';
 import { apiPost, apiGet } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import formValidator from '../../../services/validation';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 const AddPfiRequest = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {id, staffCadre} = getUserData();
   const [formData, setFormData] = useState({
+    customerType: "existing customer",
+    employeeId: "",
+    customerId: "",
     companyName: "",
     contactPerson: "",
     mobile: "",
@@ -40,23 +49,75 @@ const AddPfiRequest = () => {
     additionalInformation: "",
   })
 
+  const [errors, setErrors] = useState({});
+
+  useEffect(()=>{
+    setFormData( prevState =>({
+      ...prevState,
+      employeeId: id
+    }))
+  }, [])
+
+  useEffect(()=>{
+    if(formData.companyName && formData.customerType === "existing customer"){
+      let customerId = getCustomerIdBy(formData.companyName);
+      setFormData( prevState => ({
+        ...prevState,
+        customerId
+      }))
+    }
+  }, [formData.companyName])
+
   const [contactPersons, setContactPersons] = useState([])
   const [products, setProducts] = useState([])
 
   const queryClient = useQueryClient();
   const pfiRequestMutation = useMutation({
-    mutationFn: ()=> apiPost({ url: `/pfiRequestForm/create`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiPost({ url: `/pfiRequestForm/create`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allPfiRequests"])
       navigate(`/app/pfiRequest`)
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const customerQuery = useQuery({
     queryKey: ["allCustomers"],
-    queryFn: () => apiGet({url: "/customer"}).then( (res) => res.payload),
-    onSuccess: () => console.log(customerQuery.data)
+    queryFn: () => apiGet({url: `/customer/employee/${id}`})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
+
+  const getCustomerIdBy = (companyName) => {
+    let customerId;
+    customerQuery?.data?.forEach( customer =>{
+      if(customer.companyName === companyName){
+        customerId = customer.id
+      }
+    })
+    return customerId
+  }
 
   const listCustomerOptions = () =>{
     if(customerQuery?.data?.length){
@@ -68,8 +129,17 @@ const AddPfiRequest = () => {
 
   const productGroupQuery = useQuery({
     queryKey: ["allProductGroups"],
-    queryFn: () => apiGet({url: "/productGroup"}).then( (res) => res.payload),
-    onSuccess: () => console.log(productGroupQuery.data)
+    queryFn: () => apiGet({url: "/productGroup"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listProductGroupOptions = () =>{
@@ -108,14 +178,14 @@ const AddPfiRequest = () => {
 
   useEffect(()=>{
     let contactPerson = formData.contactPerson;
-    let contactPersonData = getContactPersonData(contactPerson);
-    console.log(contactPersonData)
-    setFormData( prevState => ({
-      ...prevState,
-      mobile: contactPersonData.phoneNumber1,
-      emailAddress: contactPersonData.email,
-      designation: contactPersonData.designation,
-    }))
+    if(formData.customerType === "existing customer"){
+      let contactPersonData = getContactPersonData(contactPerson);
+      setFormData( prevState => ({
+        ...prevState,
+        mobile: contactPersonData.phoneNumber1,
+        emailAddress: contactPersonData.email,
+      }))
+    }
   }, [formData.contactPerson])
 
   
@@ -135,7 +205,13 @@ const AddPfiRequest = () => {
         setProducts(res.payload)
       })
       .catch( error => {
-        console.log(error)
+        dispatch(
+          setMessage({
+            severity: "error",
+            message: error.message,
+            key: Date.now(),
+          })
+        );
       })
   }
 
@@ -167,7 +243,13 @@ const AddPfiRequest = () => {
       setContactPersons(res.payload);
     })
     .catch( error =>{
-      console.log(error)
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
     })
   }
 
@@ -197,15 +279,44 @@ const AddPfiRequest = () => {
       }))
       return
     }
+    
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
+
+    if(props === "customerType"){
+      setFormData(prevState => ({
+        ...prevState,
+        companyName: "",
+        companyAddress: "",
+        contactPerson: "",
+        mobile: "",
+        emailAddress: "",
+        customerId: ""
+      }))
+    }
   }
 
   const handleSubmit = (e) =>{
     e.preventDefault();
-    // return console.log(formData);
+    //return console.log(formData);
+
+    let errors = formValidator(["companyName", "companyAddress", "contactPerson", "mobile", "emailAddress", "productBrand", "vehicleModel", "quantity", "priceOfVehicle", "deliveryPeriod", "paymentType", "deliveryLocation"], formData);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     pfiRequestMutation.mutate()
   }
 
@@ -217,43 +328,55 @@ const AddPfiRequest = () => {
 
         <form className="mt-5">
           <div className="mb-3">
-            <label htmlFor="companyName" className="form-label">Company Name</label>
+            <select className="form-select shadow-none" id="customerType" onChange={handleChange("customerType")} value={formData.customerType} aria-label="Default select example">
+              <option value="existing customer">Existing Customer</option>
+              <option value="new customer">New Customer</option>
+            </select>
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="companyName" className="form-label">Company Name (<span className='fst-italic text-warning'>required</span>)</label>
             <div className='d-flex align-items-center'>
-              <select className="form-select shadow-none" id="companyName" onChange={handleChange("companyName")} value={formData.companyName} aria-label="Default select example">
+              { formData.customerType === "existing customer" ?
+                <select className="form-select shadow-none" id="companyName" onChange={handleChange("companyName")} value={formData.companyName} aria-label="Default select example">
                 <option value="">Select Company</option>
                 {!customerQuery.isLoading && listCustomerOptions()}
-              </select>
-              <input type="text" className="form-control shadow-none ms-2" value={formData.companyName} onChange={handleChange("companyName")} id="companyName" placeholder="Custom Company Name" />
+              </select> :
+              <input type="text" className="form-control shadow-none" value={formData.companyName} onChange={handleChange("companyName")} id="companyName" placeholder="New Company Name" />
+              }
             </div>
+            <span className='text-danger font-monospace small'>{errors.companyName}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="companyAddress" className="form-label">Company Address</label>
+            <label htmlFor="companyAddress" className="form-label">Company Address (<span className='fst-italic text-warning'>required</span>)</label>
             <textarea className="form-control shadow-none" value={formData.companyAddress} onChange={handleChange("companyAddress")} id="companyAddress" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.companyAddress}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="contactPerson" className="form-label">Contact Person</label>
+            <label htmlFor="contactPerson" className="form-label">Contact Person (<span className='fst-italic text-warning'>required</span>)</label>
             <div className='d-flex align-items-center'>
-              <select className="form-select shadow-none" id="contactPerson" onChange={handleChange("contactPerson")} value={formData.contactPerson} aria-label="Default select example">
-                <option value="">Contact Person</option>
-                {contactPersons.length > 0 && listContactPerson()}
-              </select>
-              <input type="text" className="form-control shadow-none ms-2" value={formData.contactPerson} onChange={handleChange("contactPerson")} id="contactPerson" placeholder="Custom Contact Person" />
+              {formData.customerType === "existing customer" ?
+                <select className="form-select shadow-none" id="contactPerson" onChange={handleChange("contactPerson")} value={formData.contactPerson} aria-label="Default select example">
+                  <option value="">Contact Person</option>
+                  {contactPersons.length > 0 && listContactPerson()}
+                </select> :
+                <input type="text" className="form-control shadow-none" value={formData.contactPerson} onChange={handleChange("contactPerson")} id="contactPerson" placeholder="Firstname Lastname" />
+              }
             </div>
+            <span className='text-danger font-monospace small'>{errors.contactPerson}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
+            <label htmlFor="phoneNumber" className="form-label">Phone Number (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" className="form-control shadow-none" value={formData.mobile} onChange={handleChange("mobile")} id="phoneNumber" placeholder="Phone Number" />
+            <span className='text-danger font-monospace small'>{errors.mobile}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="designation" className="form-label">Designation</label>
-            <input type="text" className="form-control shadow-none" value={formData.designation} onChange={handleChange("designation")} id="designation" placeholder="Designation" />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="emailAddress" className="form-label">Email Address</label>
+            <label htmlFor="emailAddress" className="form-label">Email Address (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" className="form-control shadow-none" value={formData.emailAddress} onChange={handleChange("emailAddress")} id="emailAddress" placeholder="Email Address" />
+            <span className='text-danger font-monospace small'>{errors.emailAddress}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="productBrand" className="form-label">Product Brand</label>
+            <label htmlFor="productBrand" className="form-label">Product Brand (<span className='fst-italic text-warning'>required</span>)</label>
             <div className='d-flex align-items-center'>
               <select className="form-select shadow-none" value={formData.productBrand} onChange={handleChange("productBrand")} id="productBrand" aria-label="Default select example">
                 <option value="">Select Product Brand</option>
@@ -261,43 +384,45 @@ const AddPfiRequest = () => {
               </select>
               <input type="text" className="form-control shadow-none ms-2" value={formData.productBrand} onChange={handleChange("productBrand")} id="productBrand" placeholder="Custom Product Brand" />
             </div>
+            <span className='text-danger font-monospace small'>{errors.productBrand}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="vehicleModel" className="form-label">Vehicle Model</label>
-            <div className='d-flex align-items-center'>
-              <select className="form-select shadow-none" value={formData.vehicleModel} onChange={handleChange("vehicleModel")} id="vehicleModel" aria-label="Default select example">
-                <option value="">Select Vehicle Model</option>
-                { listProducts()}
-              </select>
-              <input type="text" className="form-control shadow-none ms-2" value={formData.vehicleModel} onChange={handleChange("vehicleModel")} id="vehicleModel" placeholder="Custom Vehicle Model" />
-            </div>
+            <label htmlFor="vehicleModel" className="form-label">Vehicle Model Specific Details (<span className='fst-italic text-warning'>required</span>)</label>
+            <textarea className="form-control shadow-none" value={formData.vehicleModel} onChange={handleChange("vehicleModel")} id="vehicleModel" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.vehicleModel}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="bodyTypeDescription" className="form-label">Body Type Description</label>
+            <label htmlFor="bodyTypeDescription" className="form-label">Body Type Description / Any Extra Requirement Detail</label>
             <textarea className="form-control shadow-none" value={formData.bodyTypeDescription} onChange={handleChange("bodyTypeDescription")} id="bodyTypeDescription" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.bodyTypeDescription}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="vehicleServiceDetails" className="form-label">Vehicle Service Details</label>
+            <label htmlFor="vehicleServiceDetails" className="form-label">Any Vehicle Service Given Details</label>
             <textarea className="form-control shadow-none" value={formData.vehicleServiceDetails} onChange={handleChange("vehicleServiceDetails")} id="vehicleServiceDetails" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.vehicleServiceDetails}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="vehicleSpecialFitmentDetails" className="form-label">Vehicle Special Fitment Details</label>
+            <label htmlFor="vehicleSpecialFitmentDetails" className="form-label">Body / Special Fitment details (please be specific)</label>
             <textarea className="form-control shadow-none" value={formData.vehicleSpecialFitmentDetails} onChange={handleChange("vehicleSpecialFitmentDetails")} id="vehicleSpecialFitmentDetails" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.vehicleSpecialFitmentDetails}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="costOfBodySpecialFitment" className="form-label">Cost Of Body Special Fitment <span className='ms-3 fw-bold'>{formatAsCurrency(formData.costOfBodySpecialFitment)}</span></label>
+            <label htmlFor="costOfBodySpecialFitment" className="form-label">Cost for Body/Super Structure/Special Fitment <span className='ms-3 fw-bold'>{formatAsCurrency(formData.costOfBodySpecialFitment)}</span></label>
             <input type="number" className="form-control shadow-none" value={formData.costOfBodySpecialFitment} onChange={handleChange("costOfBodySpecialFitment")} id="costOfBodySpecialFitment" placeholder="Cost Of Body Special Fitment" />
+            <span className='text-danger font-monospace small'>{errors.costOfBodySpecialFitment}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="quantity" className="form-label">Quantity</label>
+            <label htmlFor="quantity" className="form-label">Quantity  (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="number" className="form-control shadow-none" value={formData.quantity} onChange={handleChange("quantity")} id="quantity" placeholder="Quantity of Products" />
+            <span className='text-danger font-monospace small'>{errors.quantity}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="priceOfVehicle" className="form-label">Price of Vehicle  <span className='ms-3 fw-bold'>{formatAsCurrency(formData.priceOfVehicle)}</span></label>
+            <label htmlFor="priceOfVehicle" className="form-label">Price of Vehicle (<span className='fst-italic text-warning'>required</span>)<span className='ms-3 fw-bold'>{formatAsCurrency(formData.priceOfVehicle)}</span></label>
             <input type="number" className="form-control shadow-none" value={formData.priceOfVehicle} onChange={handleChange("priceOfVehicle")} id="priceOfVehicle" placeholder="Price of Vehicle" />
+            <span className='text-danger font-monospace small'>{errors.priceOfVehicle}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="discount" className="form-label">Discount</label>
+            <label htmlFor="discount" className="form-label">Discount, if any</label>
             <input type="text" className="form-control shadow-none" value={formData.discount} onChange={handleChange("discount")} id="discount" placeholder="Discount" />
           </div>
           <div className="form-check mb-3">
@@ -319,32 +444,43 @@ const AddPfiRequest = () => {
               </label>
           </div>
           <div className="mb-3">
-            <label htmlFor="refundRebaseAmount" className="form-label">Refund / Rebase Amount  <span className='ms-3 fw-bold'>{formatAsCurrency(formData.refundRebaseAmount)}</span></label>
+            <label htmlFor="refundRebaseAmount" className="form-label">Refund/Rebate amount, if any  <span className='ms-3 fw-bold'>{formatAsCurrency(formData.refundRebaseAmount)}</span></label>
             <input type="text" className="form-control shadow-none" value={formData.refundRebaseAmount} onChange={handleChange("refundRebaseAmount")} id="refundRebaseAmount" placeholder="Amount to be Refunded" />
           </div>
           <div className="mb-3">
-            <label htmlFor="refundRebaseRecipient" className="form-label">Refund / Rebase Recipient</label>
+            <label htmlFor="refundRebaseRecipient" className="form-label">Person name receiving refund/rebate</label>
             <input type="text" className="form-control shadow-none" value={formData.refundRebaseRecipient} onChange={handleChange("refundRebaseRecipient")} id="refundRebaseRecipient" placeholder="Person to be Refunded" />
           </div>
           <div className="mb-3">
-            <label htmlFor="relationshipWithTransaction" className="form-label">Relationship with Transaction</label>
+            <label htmlFor="relationshipWithTransaction" className="form-label">Relationship with transaction (if rebate receiver is not working in buying company)</label>
             <input type="text" className="form-control shadow-none" value={formData.relationshipWithTransaction} onChange={handleChange("relationshipWithTransaction")} id="relationshipWithTransaction" placeholder="Relationship with Transaction" />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="designation" className="form-label">Designation (when rebate receiver is working in buying company)</label>
+            <input type="text" className="form-control shadow-none" value={formData.designation} onChange={handleChange("designation")} id="designation" />
           </div>
           <div className="mb-3">
             <label htmlFor="estimatedOrderClosingTime" className="form-label">Estimated Order Closing Time</label>
             <input type="text" className="form-control shadow-none" value={formData.estimatedOrderClosingTime} onChange={handleChange("estimatedOrderClosingTime")} id="estimatedOrderClosingTime" placeholder="Estimated Order Closing Time" />
           </div>
           <div className="mb-3">
-            <label htmlFor="deliveryPeriod" className="form-label">Delivery Period</label>
+            <label htmlFor="deliveryPeriod" className="form-label">Delivery Period needed for vehicle  (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" className="form-control shadow-none" value={formData.deliveryPeriod} onChange={handleChange("deliveryPeriod")} id="deliveryPeriod" placeholder="Delivery Period" />
+            <span className='text-danger font-monospace small'>{errors.deliveryPeriod}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="paymentType" className="form-label">Payment Type</label>
-            <input type="text" className="form-control shadow-none" value={formData.paymentType} onChange={handleChange("paymentType")} id="paymentType" placeholder="Direct / Bank Finance" />
+            <label htmlFor="paymentType" className="form-label">Payment Type (<span className='fst-italic text-warning'>required</span>)</label>
+            <select className="form-select shadow-none" id="paymentType" value={formData.paymentType} onChange={handleChange("paymentType")} aria-label="Default select example">
+                <option value="">Select Payment Type</option>
+                <option value="direct">Direct</option>
+                <option value="bank finance">Bank Finance</option>
+              </select> 
+            <span className='text-danger font-monospace small'>{errors.paymentType}</span>  
           </div>
           <div className="mb-3">
-            <label htmlFor="deliveryLocation" className="form-label">Delivery Location</label>
+            <label htmlFor="deliveryLocation" className="form-label">Delivery Location (<span className='fst-italic text-warning'>required</span>)</label>
             <textarea className="form-control shadow-none" value={formData.deliveryLocation} onChange={handleChange("deliveryLocation")} id="deliveryLocation" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.deliveryLocation}</span>  
           </div>
           <div className="mb-3">
             <label htmlFor="deliveryLocation" className="form-label">Additional Information</label>

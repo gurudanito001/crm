@@ -6,11 +6,15 @@ import { apiPost, apiGet } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import NaijaStates from 'naija-state-local-government';
 import { Spinner } from '../../../components/spinner';
+import formValidator from '../../../services/validation';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const AddBranch = () => {
   const navigate = useNavigate()
   const {state} = useLocation();
+  const dispatch = useDispatch();
 
   useEffect(() =>{
     if(state){
@@ -20,19 +24,43 @@ const AddBranch = () => {
       }))
     }
   }, [])
+
   const queryClient = useQueryClient();
   const branchMutation = useMutation({
-    mutationFn: ()=> apiPost({ url: `/branch/create`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiPost({ url: `/branch/create`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      ); 
       queryClient.invalidateQueries(["allBranches"])
-      navigate("/app/branch")
-    }
+      navigate(-1)
+    }).catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      ); 
+    })
   })
 
   const companyQuery = useQuery({
     queryKey: ["allCompanies"],
-    queryFn: () => apiGet({url: "/company"}).then( (res) => res.payload),
-    onSuccess: () => console.log(companyQuery.data)
+    queryFn: () => apiGet({url: "/company"})
+    .then( (res) => res.payload)
+    .catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error?.response?.data?.message || error?.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listStateOptions = () =>{
@@ -59,6 +87,8 @@ const AddBranch = () => {
     isHeadOffice: false
   });
 
+  const [errors, setErrors] = useState({})
+
   const listCompanyOptions = () =>{
     if(companyQuery?.data?.length){
       return companyQuery.data.map(company =>
@@ -72,6 +102,10 @@ const AddBranch = () => {
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors( prevState =>({
+      ...prevState,
+      [props]: ""
+    }))
   }
 
   const handleCheck = () =>{
@@ -83,6 +117,17 @@ const AddBranch = () => {
 
   const handleSubmit = (e) =>{
     e.preventDefault()
+    let errors = formValidator(["companyId", "state", "lga", "name", "code", "address"], formData);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     //return console.log(formData)
     branchMutation.mutate()
   }
@@ -95,37 +140,42 @@ const AddBranch = () => {
 
         <form className="mt-5">
           <div className="mb-3">
-            <label htmlFor="company" className="form-label">Company</label>
+            <label htmlFor="company" className="form-label">Company (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" id="company" onChange={handleChange("companyId")} value={formData.companyId} aria-label="Default select example">
               <option value="">Select Company</option>
               {!companyQuery.isLoading && listCompanyOptions()}
             </select>
+            <span className='text-danger font-monospace small'>{errors.companyId}</span>
           </div>
           <div className="mb-3">
-            <label htmlFor="state" className="form-label">State</label>
+            <label htmlFor="state" className="form-label">State (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" value={formData.state} onChange={handleChange("state")} id="state" aria-label="Default select example">
               <option value="">Select State</option>
               {listStateOptions()}
             </select>
+            <span className='text-danger font-monospace small'>{errors.state}</span>
           </div>
           <div className="mb-3">
-            <label htmlFor="lgaId" className="form-label">Local Govt Area</label>
+            <label htmlFor="lgaId" className="form-label">Local Govt Area (<span className='fst-italic text-warning'>required</span>)</label>
             <select className="form-select shadow-none" value={formData.lga} onChange={handleChange("lga")} id="lga" aria-label="Default select example">
               <option value="">Select LGA</option>
               {listLgaOptions(formData.state)}
             </select>
+            <span className='text-danger font-monospace small'>{errors.lga}</span>
           </div>
           <div className="mb-3">
-            <label htmlFor="name" className="form-label">Branch Name</label>
+            <label htmlFor="name" className="form-label">Branch Name (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" onChange={handleChange("name")} value={formData.name} className="form-control shadow-none" id="name" placeholder="Branch Name" />
           </div>
           <div className="mb-3">
-            <label htmlFor="code" className="form-label">Branch Code</label>
+            <label htmlFor="code" className="form-label">Branch Code (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" onChange={handleChange("code")} value={formData.code} className="form-control shadow-none" id="code" placeholder="Branch Code" />
+            <span className='text-danger font-monospace small'>{errors.code}</span>
           </div>
           <div className="mb-3">
-            <label htmlFor="address" className="form-label">Address</label>
+            <label htmlFor="address" className="form-label">Address (<span className='fst-italic text-warning'>required</span>)</label>
             <textarea className="form-control shadow-none" id="address" value={formData.address} onChange={handleChange("address")} rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.address}</span>
           </div>
 
           <div className="form-check">
@@ -138,7 +188,10 @@ const AddBranch = () => {
 
           <div className="d-flex mt-5">
             <button className="btn btnPurple m-0 px-5" disabled={branchMutation.isLoading} onClick={handleSubmit}>{branchMutation.isLoading ? <Spinner /> : "Submit"}</button>
-            <button className="btn btn-secondary ms-3 px-5" disabled={branchMutation.isLoading} onClick={() => navigate("/app/branch")}>Cancel</button>
+            <button className="btn btn-secondary ms-3 px-5" disabled={branchMutation.isLoading} onClick={(e) => {
+              e.preventDefault();
+              navigate(-1)
+              }}>Cancel</button>
           </div>
         </form>
       </section>

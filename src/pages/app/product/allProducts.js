@@ -7,6 +7,10 @@ import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from '../../../services/formatAsCurrency';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
+
 
 
 const ProductListItem = ({id, name, code, description, price}) =>{
@@ -29,10 +33,22 @@ const ProductListItem = ({id, name, code, description, price}) =>{
 
 
 const AllProducts = () => {
+  const dispatch = useDispatch();
+  const userData = getUserData();
 
   const productQuery = useQuery({
     queryKey: ["allProducts"],
-    queryFn: () => apiGet({url: "/product"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/product"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listAllProducts = () =>{
@@ -51,7 +67,9 @@ const AllProducts = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Products</h3>
-          <a href='/app/product/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          { userData.staffCadre === "Administrator" &&
+            <a href='/app/product/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          }
         </header>
         <p>All your products are listed below</p>
 
@@ -65,7 +83,7 @@ const AllProducts = () => {
           {!productQuery.isLoading && !productQuery.isError && productQuery?.data?.length === 0 && 
           <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Product was found !!</p>
-              <span className='text-info'>Click the [+Add] button to add a new Product</span>
+              {userData.staffCadre === "Administrator" && <span className='text-info'>Click the [+Add] button to add a new Product</span>}
           </div>}
         </ul>
       </section>

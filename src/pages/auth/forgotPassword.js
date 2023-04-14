@@ -1,17 +1,15 @@
 
-import EmojiLady2 from "../../images/emojiLady2.png"
 import '../../styles/auth.styles.css';
-import NotificationModal from "../../components/notificationModal";
 import { useState } from "react";
 import { apiPost } from "../../services/apiService";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
+import { setMessage } from '../../store/slices/notificationMessagesSlice';
+import { Spinner } from "../../components/spinner";
 
 const ForgotPassword = () =>{
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [showNotification, setShowNotification] = useState(false);
   const [formData, setFormData] = useState({
     email: ""
   })
@@ -32,12 +30,23 @@ const ForgotPassword = () =>{
     apiPost({ url: "/auth/forgotPassword", data: formData })
       .then((res) => {
         setPostingData(false);
-        alert("Success. Email sent!!");
-        console.log(res);
+        dispatch(
+          setMessage({
+            severity: "success",
+            message: res.message,
+            key: Date.now(),
+          })
+        );
       })
       .catch((error) => {
         setPostingData(false);
-        console.log(error);
+        dispatch(
+          setMessage({
+            severity: "error",
+            message: error.message,
+            key: Date.now(),
+          })
+        );
       });
   }
 
@@ -63,14 +72,12 @@ const ForgotPassword = () =>{
                   <input type="email" value={formData.email} onChange={handleChange("email")} className="form-control shadow-none" id="email" placeholder="Enter your email address" />
                 </div>
 
-                <button className="btn btnPurple w-100 mt-5" onClick={handleSubmit}>Submit</button>
+                <button className="btn btnPurple w-100 mt-5" onClick={handleSubmit}>{postingData ? <Spinner /> : "Submit"}</button>
               </form>
             </section>
           </div>
         </div>
       </div>
-
-      {showNotification && <NotificationModal img={EmojiLady2} open={showNotification} onClose={() => setShowNotification(false)} />}
     </>
   )
 }

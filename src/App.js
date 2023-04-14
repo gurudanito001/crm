@@ -35,7 +35,6 @@ import ScheduleCustomerVisit from './pages/app/customerVisit/scheduleCustomerVis
 import ReportCustomerVisit from './pages/app/customerVisit/reportCustomerVisit';
 import AllCustomerVisits from './pages/app/customerVisit/allCustomerVisits';
 import CustomerVisitDetails from './pages/app/customerVisit/customerVisitDetails';
-import EditCustomerVisitDetails from './pages/app/customerVisit/editCustomerVisitDetails';
 
 import AddProductGroup from './pages/app/productGroup/addProductGroup';
 import AllProductGroups from './pages/app/productGroup/allProductGroups';
@@ -69,6 +68,9 @@ import AddVehicleDelivery from './pages/app/vehicleDelivery/addVehicleDelivery';
 import AllVehicleDeliveries from './pages/app/vehicleDelivery/allVehicleDeliveries';
 import VehicleDeliveryDetails from './pages/app/vehicleDelivery/vehicleDeliveryDetails';
 
+import AlertNotification from './components/notifications';
+
+
 
 
 
@@ -76,6 +78,7 @@ import VehicleDeliveryDetails from './pages/app/vehicleDelivery/vehicleDeliveryD
 function App() {
   return (
     <>
+      <AlertNotification />
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -92,13 +95,13 @@ function App() {
           <Route path="/app/lga" element={<AllLgas />} />
           <Route path="/app/lga/add" element={<AddLga />} />
 
-          <Route path="/app/branch" element={<AllBranches />} />
-          <Route path="/app/branch/add" element={<AddBranch />} />
-          <Route path="/app/branch/:id" element={<BranchDetails />} />
-
           <Route path="/app/company" element={<AllCompanies />} />
           <Route path="/app/company/add" element={<AddCompany />} />
           <Route path="/app/company/:id" element={<CompanyDetails />} />
+
+          {/* <Route path="/app/company/branch" element={<AllBranches />} /> */}
+          <Route path="/app/company/branch/add" element={<AddBranch />} />
+          <Route path="/app/company/branch/:id" element={<BranchDetails />} />
 
           <Route path="/app/employee/" element={<AllEmployees />} />
           <Route path="/app/employee/add" element={<AddEmployee />} />

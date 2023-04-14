@@ -9,6 +9,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from '../../../services/formatAsCurrency';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 const PaymentDetailListItem = ({title, description}) =>{
   return(
@@ -22,14 +25,25 @@ const PaymentDetailListItem = ({title, description}) =>{
 
 const PaymentDetails = () => {
   const navigate = useNavigate();
+  let {staffCadre} = getUserData();
+  const dispatch = useDispatch();
   const [currentScreen, setCurrentScreen] = useState("details");
   const queryClient = useQueryClient();
   const { id } = useParams();
 
   const paymentDetailsQuery = useQuery({
     queryKey: ["allPayments", id],
-    queryFn: () => apiGet({ url: `/payment/${id}` }).then((res) => res.payload),
-    onSuccess: () => { console.log(paymentDetailsQuery.data) }
+    queryFn: () => apiGet({ url: `/payment/${id}` })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   return (
@@ -39,6 +53,7 @@ const PaymentDetails = () => {
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>Payment Details</h3>
           
+          {staffCadre === "Administrator" && <>
           <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={paymentDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
@@ -47,6 +62,7 @@ const PaymentDetails = () => {
               <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={paymentDetailsQuery.isLoading} style={{ height: "40px" }} onClick={() => setCurrentScreen("editDetails")}>Edit</button></li>
             </ul>
           </div>
+          </>}
         </header>
         <p>Details of payment listed below</p>
 

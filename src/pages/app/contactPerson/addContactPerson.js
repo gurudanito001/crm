@@ -6,12 +6,17 @@ import { apiPost, apiGet } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import { getUserData } from '../../../services/localStorageService';
+import formValidator from '../../../services/validation';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const AddContactPerson = () => {
-  const navigate = useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {state} = useLocation();
   const userData = getUserData();
+  
 
   useEffect(() =>{
     if(state){
@@ -22,13 +27,28 @@ const AddContactPerson = () => {
       }))
     }
   }, [])
+
   const queryClient = useQueryClient();
   const contactPersonMutation = useMutation({
-    mutationFn: ()=> apiPost({ url: `/contactPerson/create`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiPost({ url: `/contactPerson/create`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      ); 
       queryClient.invalidateQueries(["allContactPersons"])
       navigate(`/app/customer/${state.customerId}`)
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      ); 
+    })
   })
 
 
@@ -46,10 +66,21 @@ const AddContactPerson = () => {
     role: ""
   });
 
+  const [errors, setErrors] = useState({});
+
   const customerQuery = useQuery({
     queryKey: ["allCustomers"],
-    queryFn: () => apiGet({url: "/customer"}).then( (res) => res.payload),
-    onSuccess: () => console.log(customerQuery.data)
+    queryFn: () => apiGet({url: "/customer"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      ); 
+    })
   })
 
   const listCustomerOptions = () =>{
@@ -65,11 +96,26 @@ const AddContactPerson = () => {
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors(prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
   }
 
 
   const handleSubmit = (e) =>{
     e.preventDefault()
+    let errors = formValidator(["customerId", "firstName", "lastName", "phoneNumber1"], formData);
+    if(Object.keys(errors).length > 0){
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      return setErrors(errors);
+    }
     //return console.log(formData)
     contactPersonMutation.mutate()
   }
@@ -87,14 +133,17 @@ const AddContactPerson = () => {
               <option value="">Select Customer</option>
               {!customerQuery.isLoading && listCustomerOptions()}
             </select>
+            <span className='text-danger font-monospace small'>{errors.customerId}</span>
           </div>
           <div className="mb-3">
             <label htmlFor="firstName" className="form-label">First Name (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" onChange={handleChange("firstName")} value={formData.firstName} className="form-control shadow-none" id="firstName" placeholder="Contact Person First Name" />
+            <span className='text-danger font-monospace small'>{errors.firstName}</span>
           </div>
           <div className="mb-3">
             <label htmlFor="lastName" className="form-label">Last Name (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="text" onChange={handleChange("lastName")} value={formData.lastName} className="form-control shadow-none" id="lastName" placeholder="Contact Person Last Name" />
+            <span className='text-danger font-monospace small'>{errors.lastName}</span>
           </div>
           <div className="mb-3">
             <label htmlFor="email" className="form-label">Email</label>
@@ -116,6 +165,7 @@ const AddContactPerson = () => {
           <div className="mb-3">
             <label htmlFor="phoneNumber1" className="form-label">Phone Number 1 (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="tel" onChange={handleChange("phoneNumber1")} value={formData.phoneNumber1} className="form-control shadow-none" id="phoneNumber1" placeholder="Phone Number 1" />
+            <span className='text-danger font-monospace small'>{errors.phoneNumber1}</span>
           </div>
           <div className="mb-3">
             <label htmlFor="phoneNumber2" className="form-label">Phone Number 2</label>

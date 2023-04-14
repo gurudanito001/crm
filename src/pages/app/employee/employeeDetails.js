@@ -8,6 +8,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 const EmployeeDetailListItem = ({ title, description }) => {
   return (
@@ -21,33 +23,61 @@ const EmployeeDetailListItem = ({ title, description }) => {
 
 const EmployeeDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const [currentScreen, setCurrentScreen] = useState("details")
 
   const employeeDetailsQuery = useQuery({
     queryKey: ["allEmployees", id],
-    queryFn: () => apiGet({ url: `/employee/${id}` }).then((res) => res.payload),
-    onSuccess: () => { console.log(employeeDetailsQuery.data) }
+    queryFn: () => apiGet({ url: `/employee/${id}` })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const employeeDeletion = useMutation({
-    mutationFn: () => apiDelete({ url: `/employee/${id}` }).then(res => console.log(res)),
-    onSuccess: () => {
+    mutationFn: () => apiDelete({ url: `/employee/${id}` })
+    .then(res =>  {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allEmployees"])
       navigate("/app/employee");
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listBrands = () =>{
     let brandsAssigned = ""
-    employeeDetailsQuery.data.brandsAssigned.forEach( data => {
-      if(brandsAssigned === ""){
-        brandsAssigned += `${data.name}`
-      }else{
-        brandsAssigned += ` | ${data.name}`
-      }
-    })
+    if(employeeDetailsQuery.data.brandsAssigned){
+      employeeDetailsQuery.data.brandsAssigned.forEach( data => {
+        if(brandsAssigned === ""){
+          brandsAssigned += `${data.name}`
+        }else{
+          brandsAssigned += ` | ${data.name}`
+        }
+      })
+    }
+    
     return brandsAssigned;
   }
 
@@ -75,16 +105,16 @@ const EmployeeDetails = () => {
 
           {!employeeDetailsQuery.isLoading && !employeeDetailsQuery.isError &&
             <ul className='mt-5'>
-              <EmployeeDetailListItem title="First Name" description={employeeDetailsQuery.data.firstName|| "----"} />
-              <EmployeeDetailListItem title="Middle Name" description={employeeDetailsQuery.data.middleName|| "----"} />
-              <EmployeeDetailListItem title="Last Name" description={employeeDetailsQuery.data.lastName|| "----"} />
-              <EmployeeDetailListItem title="Email" description={employeeDetailsQuery.data.email|| "----"} />
-              <EmployeeDetailListItem title="Company Name" description={employeeDetailsQuery.data.companyName|| "----"} />
-              <EmployeeDetailListItem title="Staff Cadre" description={employeeDetailsQuery.data.staffCadre|| "----"} />
-              <EmployeeDetailListItem title="Supervisor" description={employeeDetailsQuery.data.supervisor.fullName || "----"} />
-              <EmployeeDetailListItem title="Product Head" description={employeeDetailsQuery.data.productHead.fullName || "----"} />
-              <EmployeeDetailListItem title="Location Manager" description={employeeDetailsQuery.data.locationManager.fullName || "----"} />
-              <EmployeeDetailListItem title="Employment Date" description={employeeDetailsQuery.data.employmentDate || "----"} />
+              <EmployeeDetailListItem title="First Name" description={employeeDetailsQuery.data?.firstName|| "----"} />
+              <EmployeeDetailListItem title="Middle Name" description={employeeDetailsQuery.data?.middleName|| "----"} />
+              <EmployeeDetailListItem title="Last Name" description={employeeDetailsQuery.data?.lastName|| "----"} />
+              <EmployeeDetailListItem title="Email" description={employeeDetailsQuery.data?.email|| "----"} />
+              <EmployeeDetailListItem title="Company Name" description={employeeDetailsQuery.data?.companyName|| "----"} />
+              <EmployeeDetailListItem title="Staff Cadre" description={employeeDetailsQuery.data?.staffCadre|| "----"} />
+              <EmployeeDetailListItem title="Supervisor" description={employeeDetailsQuery.data?.supervisor?.fullName || "----"} />
+              <EmployeeDetailListItem title="Product Head" description={employeeDetailsQuery.data?.productHead?.fullName || "----"} />
+              <EmployeeDetailListItem title="Location Manager" description={employeeDetailsQuery.data?.locationManager?.fullName || "----"} />
+              <EmployeeDetailListItem title="Employment Date" description={new Date(employeeDetailsQuery.data?.employmentDate).toDateString() || "----"} />
               <EmployeeDetailListItem title="Brands Assigned" description={listBrands() || "----"} />
             </ul>}
         </section>}

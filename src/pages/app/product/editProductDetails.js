@@ -6,24 +6,52 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import Compress from "react-image-file-resizer";
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from "../../../services/formatAsCurrency";
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
+
 
 
 const EditProductDetails = ({ data, handleCancel }) => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
 
   const queryClient = useQueryClient();
   const productDetailsMutation = useMutation({
-    mutationFn: (data) => apiPut({ url: `/product/${data.id}`, data }).then(res => console.log(res.payload)),
-    onSuccess: () => {
+    mutationFn: (data) => apiPut({ url: `/product/${data.id}`, data }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allProducts"])
       handleCancel();
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const productGroupQuery = useQuery({
     queryKey: ["allProductGroups"],
-    queryFn: () => apiGet({ url: "/productGroup" }).then((res) => res.payload)
+    queryFn: () => apiGet({ url: "/productGroup" })
+    .then((res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listProductGroupOptions = () => {
@@ -48,6 +76,8 @@ const EditProductDetails = ({ data, handleCancel }) => {
     vatRate: "",
     extraData: {}
   });
+
+  const [errors, setErrors] = useState({});
 
   const [selectedFile, setSelectedFile] = useState("");
   const [imageUrl, setImageUrl] = useState([]);
@@ -144,6 +174,10 @@ const EditProductDetails = ({ data, handleCancel }) => {
       ...prevState,
       [props]: event.target.value
     }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
   }
 
   const handleSubmit = (e) => {
@@ -153,10 +187,6 @@ const EditProductDetails = ({ data, handleCancel }) => {
     //return console.log(data);
     productDetailsMutation.mutate(data);
   }
-
-
-
-
 
 
   return (

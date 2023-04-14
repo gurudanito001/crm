@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { apiPost, apiGet, apiPut } from '../../../services/apiService';
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const EditPaymentDetails = ({ data, handleCancel }) => {
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -24,12 +27,28 @@ const EditPaymentDetails = ({ data, handleCancel }) => {
     vatPaymentReceipt: "",
     additionalInformation: ""
   })
+
+  const [errors, setErrors] = useState({})
   const paymentDetailsMutation = useMutation({
-    mutationFn: () => apiPut({ url: `/payment/${data.id}`, data: formData }).then(res => console.log(res.payload)),
-    onSuccess: () => {
+    mutationFn: () => apiPut({ url: `/payment/${data.id}`, data: formData }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allPayments"])
       handleCancel();
-    }
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   useEffect(()=>{
@@ -43,6 +62,10 @@ const EditPaymentDetails = ({ data, handleCancel }) => {
     setFormData(prevState => ({
       ...prevState,
       [props]: event.target.value
+    }))
+    setErrors( prevState => ({
+      ...prevState,
+      [props]: ""
     }))
   }
 

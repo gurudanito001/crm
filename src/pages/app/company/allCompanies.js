@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 
@@ -29,16 +32,25 @@ const CompanyListItem = ({id, name, email, code }) =>{
 
 
 const AllCompanies = () => {
+  const dispatch = useDispatch();
+  let {staffCadre} = getUserData();
 
   const companyQuery = useQuery({
     queryKey: ["allCompanies"],
     queryFn: () => apiGet({url: "/company"})
     .then( (res) => res.payload)
-    .catch()
+    .catch(error => {
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error?.response?.data?.message || error?.message,
+          key: Date.now(),
+        })
+      ); 
+    })
   })
 
   const listAllCompanies = () =>{
-    console.log(companyQuery)
     return companyQuery?.data?.map( company => <CompanyListItem 
       key={company.id}
       id={company.id}
@@ -65,7 +77,7 @@ const AllCompanies = () => {
           {!companyQuery.isLoading && !companyQuery.isError && listAllCompanies()}
           {!companyQuery.isLoading && !companyQuery.isError && companyQuery.data.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Company was found !!</p>
-              <span className='text-info'>Click the [+Add] button to add a new company</span>
+              {staffCadre !== "Administrator" && <span className='text-info'>Click the [+Add] button to add a new company</span>}
           </div>}
         </ul>
       </section>

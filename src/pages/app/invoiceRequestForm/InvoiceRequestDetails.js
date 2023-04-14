@@ -8,6 +8,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from '../../../services/formatAsCurrency';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 
@@ -23,16 +26,26 @@ const InvoiceRequestDetailListItem = ({title, description}) =>{
 
 const InvoiceRequestDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const {state} = useLocation()
+  const {staffCadre} = getUserData();
   const [currentScreen, setCurrentScreen] = useState("details")
 
   const invoiceRequestDetailsQuery = useQuery({
     queryKey: ["allInvoiceRequests", id],
     queryFn: () => apiGet({url: `/invoiceRequestForm/${id}`}).then( (res) => {
       return res.payload
-    }),
+    }).catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   return (
@@ -41,6 +54,9 @@ const InvoiceRequestDetails = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>Invoice Request Details</h3>
+
+          {
+            staffCadre !== "Administrator" && 
           <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={invoiceRequestDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
@@ -49,6 +65,7 @@ const InvoiceRequestDetails = () => {
               <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={invoiceRequestDetailsQuery.isLoading} style={{ height: "40px" }} onClick={() => setCurrentScreen("editDetails")}>Edit</button></li>
             </ul>
           </div>
+          }
         </header>
         <p>Details of invoice request listed below</p>
 
@@ -87,7 +104,7 @@ const InvoiceRequestDetails = () => {
           {/* <InvoiceRequestDetailListItem title="Warranty Certificate" description={invoiceRequestDetailsQuery.data.warrantyCertificate || "----"} /> */}
           <li className='py-2 d-flex flex-column flex-wrap border-bottom'>
             <header className="small text-uppercase mb-3">Warranty Certificate</header>
-            <img src={invoiceRequestDetailsQuery.data.warrantyCertificate} alt="Warranty Certificate" />
+            {invoiceRequestDetailsQuery.data.warrantyCertificate && <img src={invoiceRequestDetailsQuery.data.warrantyCertificate} alt="Warranty Certificate" />}
           </li>
           <InvoiceRequestDetailListItem title="Agreed Credit Period" description={invoiceRequestDetailsQuery.data.agreedCreditPeriod || "----"} />
           <InvoiceRequestDetailListItem title="Rebate Reciever" description={invoiceRequestDetailsQuery.data.rebateReceiver || "----"} />

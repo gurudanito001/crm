@@ -9,6 +9,10 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import formatAsCurrency from '../../../services/formatAsCurrency';
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
+
 
 
 const ProductDetailListItem = ({title, description}) =>{
@@ -23,6 +27,9 @@ const ProductDetailListItem = ({title, description}) =>{
 
 const ProductDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const userData = getUserData();
+
   const {state} = useLocation();
   const queryClient = useQueryClient();
   const { id } = useParams();
@@ -32,16 +39,39 @@ const ProductDetails = () => {
 
   const productDetailsQuery = useQuery({
     queryKey: ["allProducts", id],
-    queryFn: () => apiGet({url: `/product/${id}`}).then( (res) => res.payload),
-    onSuccess: () =>{ console.log(productDetailsQuery.data)}
+    queryFn: () => apiGet({url: `/product/${id}`})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const productDeletion = useMutation({
-    mutationFn: ()=> apiDelete({ url: `/product/${id}`}).then(res => console.log(res)),
-    onSuccess: () =>{
+    mutationFn: ()=> apiDelete({ url: `/product/${id}`}).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allProducts"])
       navigate("/app/product");
-    }
+    }).catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   return (
@@ -50,6 +80,8 @@ const ProductDetails = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>Product Details</h3>
+
+          { userData.staffCadre === "Administrator" &&
           <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={productDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
@@ -58,7 +90,7 @@ const ProductDetails = () => {
               <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={productDetailsQuery.isLoading} style={{ height: "40px" }} onClick={() => setCurrentScreen("editDetails")}>Edit</button></li>
               {/* <li><button className='btn btn-sm btn-light text-danger fw-bold w-100'  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">delete</button></li> */}
             </ul>
-          </div>
+          </div>}
         </header>
         <p>Details of product listed below</p>
 

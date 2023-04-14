@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 const BranchListItem = ({id, name, code, address}) =>{
@@ -27,10 +29,21 @@ const BranchListItem = ({id, name, code, address}) =>{
 
 
 const AllBranches = () => {
+  const dispatch = useDispatch();
 
   const branchQuery = useQuery({
     queryKey: ["allBranches"],
-    queryFn: () => apiGet({url: "/branch"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/branch"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error?.response?.data?.message || error?.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listAllBranches = () =>{
@@ -49,7 +62,7 @@ const AllBranches = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Branches</h3>
-          <a href='/app/Branch/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          <a href='/app/branch/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
         <p>All Branches are listed below</p>
         {branchQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>

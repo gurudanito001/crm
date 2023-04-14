@@ -6,11 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 
 const VisitPlanListItem = ({id, monthlyVisitPlan, weeklyVisitPlan}) =>{
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/plan/${id}`)}>
       <div className='w-75 d-flex align-items-start pe-2'>
@@ -35,10 +38,20 @@ const VisitPlanListItem = ({id, monthlyVisitPlan, weeklyVisitPlan}) =>{
 
 const AllVisitPlans = () => {
   const [showNotification, setShowNotification] = useState(false);
-
+  const dispatch = useDispatch();
   const visitPlanQuery = useQuery({
     queryKey: ["allVisitPlans"],
-    queryFn: () => apiGet({url: "/visitPlan"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/visitPlan"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listAllVisitPlans = () =>{

@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 
 
-const EmployeeListItem = ({id, firstName, middleName, lastName,  staffCadre, email}) =>{
+const EmployeeListItem = ({id, firstName, middleName, lastName,  staffCadre, companyName}) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/employee/${id}`)}>
@@ -17,7 +19,7 @@ const EmployeeListItem = ({id, firstName, middleName, lastName,  staffCadre, ema
         <span className='bgPurple p-3 me-3'><i className="bi bi-file-person-fill text-white fs-5"></i></span>
         <article>
           <span className='h6 fw-bold'>{firstName}. {middleName[0]}. {lastName}</span> <br />
-          <span>{email}</span>
+          <span>{companyName}</span>
         </article>
       </div>
       <div className='w-25 d-flex align-items-center'>
@@ -29,10 +31,20 @@ const EmployeeListItem = ({id, firstName, middleName, lastName,  staffCadre, ema
 
 
 const AllEmployees = () => {
-
+  const dispatch = useDispatch();
   const employeeQuery = useQuery({
     queryKey: ["allEmployees"],
-    queryFn: () => apiGet({url: "/employee"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/employee"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listAllEmployees = () =>{
@@ -43,7 +55,7 @@ const AllEmployees = () => {
       middleName={employee.middleName}
       lastName={employee.lastName}
       staffCadre={employee.staffCadre}
-      email={employee.email}
+      companyName={employee.companyName}
     />)
   }
 

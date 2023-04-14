@@ -9,6 +9,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import ListItem from '../../../components/listItem';
 import { Spinner } from '../../../components/spinner';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 
 const ContactPersonDetailListItem = ({title, description}) =>{
   return(
@@ -21,6 +23,7 @@ const ContactPersonDetailListItem = ({title, description}) =>{
 
 
 const ContactPersonDetails = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id } = useParams();
@@ -29,17 +32,32 @@ const ContactPersonDetails = () => {
 
   const contactPersonDetailsQuery = useQuery({
     queryKey: ["allContactPersons", id],
-    queryFn: () => apiGet({url: `/contactPerson/${id}`}).then( (res) => res.payload),
-    onSuccess: () => console.log(contactPersonDetailsQuery.data)
+    queryFn: () => apiGet({url: `/contactPerson/${id}`})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
-  /* const contactPersonDeletion = useMutation({
-    mutationFn: ()=> apiDelete({ url: `/contactPerson/${id}`}).then(res => console.log(res)),
-    onSuccess: () =>{
+  const contactPersonDeletion = useMutation({
+    mutationFn: ()=> apiDelete({ url: `/contactPerson/${id}`}).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
       queryClient.invalidateQueries(["allContactPersons"])
       navigate("/app/contactPerson");
-    }
-  }) */
+    })
+  })
 
   return (
     <Layout>
@@ -69,7 +87,7 @@ const ContactPersonDetails = () => {
         <ul className='mt-5'>
           {state?.companyName && 
           <ContactPersonDetailListItem title="Company Name" description={state?.companyName || "----"} />}
-          <ContactPersonDetailListItem title="Full Name" description={`${contactPersonDetailsQuery.data.title} ${contactPersonDetailsQuery.data.firstName} ${contactPersonDetailsQuery.data.lastName}` || "----"} />
+          <ContactPersonDetailListItem title="Full Name" description={`${contactPersonDetailsQuery.data.title || ""} ${contactPersonDetailsQuery.data.firstName || ""} ${contactPersonDetailsQuery.data.lastName || ""}` || "----"} />
           <ContactPersonDetailListItem title="Email" description={contactPersonDetailsQuery.data.email || "----"} />
           <ContactPersonDetailListItem title="Department" description={contactPersonDetailsQuery.data.department || "----"} />
           <ContactPersonDetailListItem title="Designation" description={contactPersonDetailsQuery.data.designation || "----"} />

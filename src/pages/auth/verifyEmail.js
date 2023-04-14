@@ -8,10 +8,13 @@ import NotificationModal from "../../components/notificationModal";
 import { useState } from "react";
 import PlaceHolderBg from "../../images/placeHolderAuthBg.png";
 import ReactCodeInput from "react-code-input";
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../store/slices/notificationMessagesSlice';
 
 
 const VerifyEmail = () =>{
   const [showNotification, setShowNotification] = useState(false);
+  const dispatch = useDispatch();
 
   return (
     <>

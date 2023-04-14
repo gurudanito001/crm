@@ -13,11 +13,10 @@ const Layout = ({children}) =>{
   const [sidebarTab, setSidebarTab] = useState("notifications")
 
   useEffect(() =>{
-    let parsedUserData = userData
-    if(!parsedUserData.token){
+    if(!userData){
       navigate("/login")
     }
-  }, [])
+  })
 
 
 

@@ -7,6 +7,9 @@ import { apiGet } from '../../../services/apiService';
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from '../../../services/formatAsCurrency';
+import { useDispatch } from 'react-redux';
+import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 
@@ -30,9 +33,21 @@ const PaymentListItem = ({id, nameOfCustomer, customerAddress, advancePaymentRec
 
 
 const AllPayments = () => {
+  const dispatch = useDispatch();
+  let {staffCadre} = getUserData();
   const paymentQuery = useQuery({
     queryKey: ["allPayments"],
-    queryFn: () => apiGet({url: "/payment"}).then( (res) => res.payload)
+    queryFn: () => apiGet({url: "/payment"})
+    .then( (res) => res.payload)
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const listAllPayments = () =>{
@@ -50,7 +65,9 @@ const AllPayments = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Payments</h3>
+          {staffCadre === "Administrator" &&
           <a href='/app/payment/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          }
         </header>
         <p>All your invoice requests are listed below</p>
 
@@ -63,7 +80,7 @@ const AllPayments = () => {
           
           {!paymentQuery.isLoading && !paymentQuery.isError && paymentQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Payment was found !!</p>
-              <span className='text-info'>Click the [+Add] button to add a new payment</span>
+              { staffCadre === "Administrator" &&<span className='text-info'>Click the [+Add] button to add a new payment</span>}
           </div>}
         </ul>
       </section>
