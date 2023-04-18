@@ -11,6 +11,7 @@ import ConfirmDeleteModal from '../../../components/confirmDeleteModal';
 import ListItem from '../../../components/listItem';
 import { useDispatch } from 'react-redux';
 import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import { getUserData } from '../../../services/localStorageService';
 
 
 const CompanyDetailListItem = ({title, description}) =>{
@@ -28,6 +29,7 @@ const CompanyDetails = (props) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const { id } = useParams();
+  const {staffCadre} = getUserData()
 
   const companyDetailsQuery = useQuery({
     queryKey: ["allCompanies", id],
@@ -108,16 +110,17 @@ const CompanyDetails = (props) => {
           <h3 className='fw-bold me-auto'>Company Details</h3>
 
 
-            <div className="btn-group">
-              <button className="btn btn-sm border-secondary rounded" disabled={companyDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i className="bi bi-three-dots-vertical fs-5"></i>
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end p-0">
-                <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>setCurrentScreen("editDetails")}>Edit</button></li>
-                <li><button className='btn btn-sm btn-light text-dark fw-bold w-100'  disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>navigate("/app/company/branch/add", {state: {companyId: id}})} >Add Branch</button></li>
-                <li><button className='btn btn-sm btn-light text-danger fw-bold w-100'  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">delete</button></li>
-              </ul>
-            </div>
+          {staffCadre === "Administrator" &&
+          <div className="btn-group">
+            <button className="btn btn-sm border-secondary rounded" disabled={companyDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i className="bi bi-three-dots-vertical fs-5"></i>
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end p-0">
+              <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>setCurrentScreen("editDetails")}>Edit</button></li>
+              <li><button className='btn btn-sm btn-light text-dark fw-bold w-100'  disabled={companyDetailsQuery.isLoading} style={{height: "40px"}} onClick={()=>navigate("/app/company/branch/add", {state: {companyId: id}})} >Add Branch</button></li>
+              {/* <li><button className='btn btn-sm btn-light text-danger fw-bold w-100'  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">delete</button></li> */}
+            </ul>
+          </div>}
           
           
         </header>

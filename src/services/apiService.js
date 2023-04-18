@@ -4,9 +4,9 @@ import { getToken, deleteToken, getFingerprint } from "./localStorageService";
 import config from "../config";
 
 //dev
-//const baseUrl = `http://localhost:8080`;
+const baseUrl = `http://localhost:8080`;
 //PROD
-const baseUrl = `https://kcg-crm-backend.vercel.app`;
+//const baseUrl = `https://kcg-crm-backend.vercel.app`;
 
 function setHeaders(extraHeaders) {
   let token = getToken();

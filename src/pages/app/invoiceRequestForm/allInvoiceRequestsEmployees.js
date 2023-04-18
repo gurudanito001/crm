@@ -70,8 +70,10 @@ const AllInvoiceRequestsEmployees = () => {
     <Layout>
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
+          <h3 className='fw-bold me-auto'>All Invoice Requests</h3>
           <a href='/app/invoiceRequest/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
+        
         <p>All your invoice requests are listed below</p>
 
         {invoiceRequestQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>

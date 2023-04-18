@@ -67,7 +67,9 @@ const AllCompanies = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Companies</h3>
-          <a href='/app/company/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          { staffCadre === "Administrator" &&
+            <a href='/app/company/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
+          }
         </header>
         <p>All Companies are listed below</p>
         {companyQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
