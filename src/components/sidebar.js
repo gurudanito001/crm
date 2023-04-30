@@ -56,20 +56,23 @@ const SideBar = () =>{
       </header>
       <ul className="pb-5" style={{height: "calc(100vh - 81px)", overflow: "auto"}}>
         <ListItem title="Dashboard" link="/app/dashboard" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-bar-chart-line-fill" />
+
         <ListItem title="Companies" link="/app/company" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-building" />
-        {staffCadre === "Administrator" && <>
-        <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-file-person-fill" />
-        </>}
-        <ListItem title="Customers" link="/app/customer" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-buildings" />
         <ListItem title="Product Groups" link="/app/prodGroup" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-diagram-3-fill" />
         <ListItem title="Products" link="/app/product" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-car-front" />
-        <ListItem title="Visit Plans" link="/app/plan" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-calendar3"  />
+        {staffCadre === "Administrator" && <>
+          <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-person-circle" />
+        </>}
+        <ListItem title="Customers" link="/app/customer" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-buildings" />
         <ListItem title="Customer Visits" link="/app/visit" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-calendar-check " />
-        <ListItem title="Marketing Activities" link="/app/markettingActivity" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-rocket-takeoff" />
-        <ListItem title="PFI Request Forms" link="/app/pfiRequest" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-receipt" />
+        <ListItem title="PFI Request Forms" link="/app/pfiRequest" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-file-earmark-spreadsheet" />
         <ListItem title="Invoice Request Forms" link="/app/invoiceRequest" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-receipt-cutoff" />
         <ListItem title="Vehicle Deliveries" link="/app/delivery" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-truck-flatbed" />
         <ListItem title="Payments" link="/app/payment" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-cash" />
+        <ListItem title="Sales Invoices" link="/app/salesInvoice" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-receipt" />
+        <ListItem title="Target / Achievements" link="/app/targetAchievements" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-bullseye" />
+        <ListItem title="Marketting Activities" link="/app/markettingActivity" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-rocket-takeoff" />
+        <ListItem title="Visit Plans" link="/app/plan" pathname={location.pathname} active={false} closeSidebar={closeSidebar} icon="bi-calendar3" />
       </ul>
     </aside>
   )

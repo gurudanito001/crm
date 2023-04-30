@@ -60,7 +60,8 @@ import AddPfiRequest from './pages/app/pfiRequestForm/addPfiRequest';
 import AllPfiRequests from './pages/app/pfiRequestForm/allPfiRequest';
 import PfiRequestDetails from './pages/app/pfiRequestForm/pfiRequestDetails';
 
-import AddVisitPlan from './pages/app/visitPlan/addVisitPlan';
+import AddWeeklyVisitPlan from './pages/app/visitPlan/addWeeklyVisitPlan';
+import AddMonthlyVisitPlan from './pages/app/visitPlan/addMonthlyVisitPlan';
 import AllVisitPlans from './pages/app/visitPlan/allVisitPlans';
 import VisitPlanDetails from './pages/app/visitPlan/visitPlanDetails';
 
@@ -68,7 +69,16 @@ import AddVehicleDelivery from './pages/app/vehicleDelivery/addVehicleDelivery';
 import AllVehicleDeliveries from './pages/app/vehicleDelivery/allVehicleDeliveries';
 import VehicleDeliveryDetails from './pages/app/vehicleDelivery/vehicleDeliveryDetails';
 
+import AddMonthlyTarget from './pages/app/monthlyTarget/addMonthlyTarget';
+import AllMonthlyTargets from './pages/app/monthlyTarget/allMonthlyTargets';
+import MonthlyTargetDetails from './pages/app/monthlyTarget/monthlyTargetDetails';
+
+import AddSalesInvoice from './pages/app/salesInvoice/addSalesInvoice';
+import AllSalesInvoice from './pages/app/salesInvoice/allSalesInvoice';
+import SalesInvoiceDetails from './pages/app/salesInvoice/salesInvoiceDetials';
+
 import AlertNotification from './components/notifications';
+
 
 
 
@@ -145,12 +155,21 @@ function App() {
           <Route path="/app/pfiRequest/:id" element={<PfiRequestDetails />} />
 
           <Route path="/app/plan/" element={<AllVisitPlans />} />
-          <Route path="/app/plan/add" element={<AddVisitPlan />} />
-          <Route path="/app/plan/:id" element={<VisitPlanDetails />} />
+          <Route path="/app/plan/weekly/add" element={<AddWeeklyVisitPlan />} />
+          <Route path="/app/plan/monthly/add" element={<AddMonthlyVisitPlan />} />
+          <Route path="/app/plan/:type/:id" element={<VisitPlanDetails />} />
 
           <Route path="/app/delivery/" element={<AllVehicleDeliveries />} />
           <Route path="/app/delivery/add" element={<AddVehicleDelivery />} />
           <Route path="/app/delivery/:id" element={<VehicleDeliveryDetails />} />
+
+          <Route path="/app/targetAchievements" element={<AllMonthlyTargets />} />
+          <Route path="/app/targetAchievements/add" element={<AddMonthlyTarget />} />
+          <Route path="/app/targetAchievements/:id" element={<MonthlyTargetDetails />} />
+
+          <Route path="/app/salesInvoice" element={<AllSalesInvoice />} /> 
+          <Route path="/app/salesInvoice/add" element={<AddSalesInvoice />} />
+          <Route path="/app/salesInvoice/:id" element={<SalesInvoiceDetails />} />
 
         </Routes>
       </Router>

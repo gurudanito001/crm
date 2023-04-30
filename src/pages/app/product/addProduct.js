@@ -11,6 +11,7 @@ import formValidator from '../../../services/validation';
 import { useDispatch } from 'react-redux';
 import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 import { getUserData } from '../../../services/localStorageService';
+import { Document, Page } from 'react-pdf';
 
 
 const AddProduct = () => {
@@ -79,13 +80,18 @@ const AddProduct = () => {
     extraData: {}
   });
   
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState({});
 
+  const [ selectedImage, setSelectedImage] = useState("");
   const [ selectedFile, setSelectedFile] = useState("");
   const [ imageUrl, setImageUrl] = useState([]);
-  const [ tempImageUrl, setTempImageUrl] = useState("")
+  const [fileUrl, setFileUrl] = useState([]);
+  const [ tempImageUrl, setTempImageUrl] = useState("");
+  const [ tempFileUrl, setTempFileUrl] = useState("");
   const [ base64Image, setBase64Image ] = useState([]);
-  const [ tempBase64Image, setTempBase64Image] = useState("")
+  const [ base64File, setBase64File ] = useState([]);
+  const [ tempBase64Image, setTempBase64Image] = useState("");
+  const [ tempBase64File, setTempBase64File] = useState("");
 
   useEffect(()=>{
     if(state?.productGroupId){
@@ -127,10 +133,36 @@ const AddProduct = () => {
         },
         "base64" // blob or base64 default base64
       );
-      setSelectedFile(file);
+      setSelectedImage(file);
       setTempImageUrl(URL.createObjectURL(file))
     }
   }
+
+  const uploadFile = (event) => {
+    let selectedFile = event.target.files;
+    let file = null;
+    let fileName = "";
+    //Check File is not Empty
+    if (selectedFile.length > 0) {
+      // Select the very first file from list
+      let fileToLoad = selectedFile[0];
+      fileName = fileToLoad.name;
+      // FileReader function for read the file.
+      let fileReader = new FileReader();
+      // Onload of file read the file content
+      fileReader.onload = function(fileLoadedEvent) {
+        file = fileLoadedEvent.target.result;
+        // Print data in console
+        console.log(file);
+        setFormData( prevState => ({
+          ...prevState,
+          brochures: [...prevState.brochures, file]
+        }))
+      };
+      // Convert data to base64
+      fileReader.readAsDataURL(fileToLoad);
+    }
+}
 
   useEffect(()=>{
     console.log({base64Image, imageUrl});
@@ -148,7 +180,7 @@ const AddProduct = () => {
         tempImageUrl
       ])); 
       setTempImageUrl("")
-      setSelectedFile("")
+      setSelectedImage("")
     }
   }
 
@@ -186,8 +218,10 @@ const AddProduct = () => {
 
   const handleSubmit = (e) =>{
     e.preventDefault()
+    
     let data = formData;
     data.images = base64Image;
+    //return console.log(data);
     let errors = formValidator(["code", "name", "description", "productGroupId", "price", "images"], data);
     if(Object.keys(errors).length > 0){
       dispatch(
@@ -199,7 +233,6 @@ const AddProduct = () => {
       );
       return setErrors(errors);
     }
-    //return console.log(data);
     productMutation.mutate(data)
   }
 
@@ -250,7 +283,7 @@ const AddProduct = () => {
 
           <div className="mb-3">
             <label htmlFor="brochure" className="form-label">Brochure</label>
-            <input className="form-control form-control-lg shadow-none"  id="brochure" type="file" />
+            <input className="form-control form-control-lg shadow-none"  id="brochure" type="file" onChange={uploadFile} />
           </div>
 
           <div className="mb-3">

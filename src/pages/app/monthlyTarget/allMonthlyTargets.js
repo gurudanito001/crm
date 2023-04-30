@@ -1,18 +1,18 @@
 import '../../../styles/auth.styles.css';
 import { getUserData } from '../../../services/localStorageService';
-import AllVisitPlansAdmin from './allVisitPlansAdmin';
-import AllVisitPlansEmployees from './allVisitPlansEmployees';
+import AllMonthlyTargetsAdmin from './allMonthlyTargetsAdmin';
+import AllMonthlyTargetsEmployees from './allMonthlyTargetsEmployees';
 
 
 
-const AllVisitPlans = () => {
+const AllMonthlyTargets = () => {
   const {staffCadre} = getUserData();
 
   let component = () =>{
     if(staffCadre === "Administrator"){
-      return <AllVisitPlansAdmin />
+      return <AllMonthlyTargetsAdmin />
     }else{
-      return <AllVisitPlansEmployees />
+      return <AllMonthlyTargetsEmployees />
     }
   }
 
@@ -23,4 +23,4 @@ const AllVisitPlans = () => {
   )
 }
 
-export default AllVisitPlans;
+export default AllMonthlyTargets;

@@ -18,21 +18,24 @@ const InsideNav = () => {
             <button className="btn btn-link dropdown-toggle sidebarDropdown shadow-none text-dark d-lg-none" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false"><i className={`bi bi-list fs-4 `}></i></button>
             <ul className="dropdown-menu border pb-5" aria-labelledby="dropdownMenuLink" style={{ minWidth: "300px", marginTop: "18px", height: "calc(100vh - 150px)", overflow: "auto" }}>
               <ListItem title="Dashboard" link="/app/dashboard" pathname={location.pathname} active={false} icon="bi-bar-chart-line-fill" />
-              {/* <ListItem title="States" link="/app/state" pathname={location.pathname} active={false}  icon="bi-globe-europe-africa" /> */}
-              {/* <ListItem title="Branches" link="/app/branch" pathname={location.pathname} active={false} icon="bi-house-fill" /> */}
-              {/* <ListItem title="Local Govt Areas" link="/app/lga" pathname={location.pathname} active={false} icon="bi-pin-map-fill" /> */}
 
               <ListItem title="Companies" link="/app/company" pathname={location.pathname} active={false} icon="bi-building" />
+              <ListItem title="Product Groups" link="/app/prodGroup" pathname={location.pathname} active={false} icon="bi-diagram-3-fill" />
+              <ListItem title="Products" link="/app/product" pathname={location.pathname} active={false} icon="bi-car-front" />
               <ListItem title="Employees" link="/app/employee" pathname={location.pathname} active={false} icon="bi-person-circle" />
               <ListItem title="Customers" link="/app/customer" pathname={location.pathname} active={false} icon="bi-buildings" />
-              <ListItem title="Products" link="/app/product" pathname={location.pathname} active={false} icon="bi-car-front" />
-              <ListItem title="Visit Plan" link="/app/plan" pathname={location.pathname} active={false} icon="bi-calendar3" />
               <ListItem title="Customer Visits" link="/app/visit" pathname={location.pathname} active={false} icon="bi-calendar-check " />
-              <ListItem title="Marketting Activities" link="/app/markettingActivity" pathname={location.pathname} active={false} icon="bi-rocket-takeoff" />
-              <ListItem title="PFI Request Forms" link="/app/pfiRequest" pathname={location.pathname} active={false} icon="bi-receipt" />
+              <ListItem title="PFI Request Forms" link="/app/pfiRequest" pathname={location.pathname} active={false} icon="bi-file-earmark-spreadsheet" />
               <ListItem title="Invoice Request Forms" link="/app/invoiceRequest" pathname={location.pathname} active={false} icon="bi-receipt-cutoff" />
               <ListItem title="Vehicle Deliveries" link="/app/delivery" pathname={location.pathname} active={false} icon="bi-truck-flatbed" />
               <ListItem title="Payments" link="/app/payment" pathname={location.pathname} active={false} icon="bi-cash" />
+              <ListItem title="Sales Invoices" link="/app/salesInvoice" pathname={location.pathname} active={false} icon="bi-receipt" />
+              <ListItem title="Target / Achievements" link="/app/targetAchievements" pathname={location.pathname} active={false} icon="bi-bullseye" />
+              <ListItem title="Marketting Activities" link="/app/markettingActivity" pathname={location.pathname} active={false} icon="bi-rocket-takeoff" />
+              <ListItem title="Visit Plans" link="/app/plan" pathname={location.pathname} active={false} icon="bi-calendar3" />
+              
+              
+              
             </ul>
           </div>
 
