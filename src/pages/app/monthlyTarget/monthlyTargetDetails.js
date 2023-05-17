@@ -85,6 +85,8 @@ const MonthlyTargetDetails = () => {
           <ul className='mt-5'>
             <MonthlyTargetDetailListItem title="Month" description={monthlyTargetDetailsQuery.data.month || "----"} />
             <MonthlyTargetDetailListItem title="Plan For Month" description={monthlyTargetDetailsQuery.data.planForMonth || "----"} />
+            <MonthlyTargetDetailListItem title="Date Created" description={new Date(monthlyTargetDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <MonthlyTargetDetailListItem title="Last Updated" description={new Date(monthlyTargetDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
 
           <ul>

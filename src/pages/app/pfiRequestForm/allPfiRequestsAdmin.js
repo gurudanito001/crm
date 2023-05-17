@@ -1,6 +1,6 @@
 
 import '../../../styles/auth.styles.css';
-import { useState, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import Layout from "../../../components/layout";
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
@@ -11,7 +11,7 @@ import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 import { getUserData } from '../../../services/localStorageService';
 
 
-const PfiRequestListItem = ({id,companyName, contactPerson, productBrand, vehicleModel, quantity}) =>{
+const PfiRequestListItem = ({id,companyName, contactPerson, vehicles, quantity, approved}) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/pfiRequest/${id}`)}>
@@ -20,11 +20,12 @@ const PfiRequestListItem = ({id,companyName, contactPerson, productBrand, vehicl
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{companyName}</span>
           <span>{contactPerson}</span>
-          <span>{productBrand} - {vehicleModel}</span>
+          <span>{vehicles}</span>
         </article>
       </div>
-      <div className='w-25 d-flex align-items-center'>
-        <span className='small fw-bold ms-auto'>{quantity} units</span>
+      <div className='w-25 d-flex flex-column align-items-center'>
+        <span className='small fw-bold ms-auto mt-auto'>{quantity} vehicle brand(s)</span>
+        <span className={`small fw-bold ms-auto mb-auto ${approved ? "text-success" : "text-danger"}`}>{approved ? "Approved" : "Not Approved"}</span>
       </div>
     </li>
   )
@@ -33,10 +34,20 @@ const PfiRequestListItem = ({id,companyName, contactPerson, productBrand, vehicl
 
 const AllPfiRequestsAdmin = () => {
   const dispatch = useDispatch();
+
+  const [employeeId, setEmployeeId] = useState("");
+
+  const deriveUrl = () =>{
+    if(employeeId){
+      return `/pfiRequestForm/employee/${employeeId}`
+    }else{
+      return "/pfiRequestForm"
+    }
+  }
   
   const pfiRequestQuery = useQuery({
     queryKey: ["allPfiRequests"],
-    queryFn: () => apiGet({url: "/pfiRequestForm"})
+    queryFn: () => apiGet({url: deriveUrl()})
     .then( (res) =>{
       return res.payload
     })
@@ -65,6 +76,14 @@ const AllPfiRequestsAdmin = () => {
       );
     })
   })
+
+  const listEmployees = () =>{
+    if(employeeQuery.data.length > 0){
+      return employeeQuery.data.map(employee =>
+        <option key={employee.id} value={employee.id}>{`${employee.firstName} ${employee.lastName}`}</option>
+      )
+    }
+  }
 
   const sortpfiRequests = () =>{
     let sortedData = {};
@@ -103,16 +122,16 @@ const AllPfiRequestsAdmin = () => {
         <li className='h6 fw-bold mt-4 fs-6'>
           <a className='small' href={`/app/employee/${data.id}`}>{data.fullName} ({data.email})</a>
         </li>
-        {sortedPfiRequests[key].map( item => {
+        {sortedPfiRequests[key].length && sortedPfiRequests[key].map( item => {
           return (
             <PfiRequestListItem
               key={item.id}
               id={item.id}
               companyName={item.companyName}
               contactPerson={item.contactPerson}
-              productBrand={item.productBrand}
-              vehicleModel={item.vehicleModel}
-              quantity={item.quantity}
+              vehicles={listPfiVehicles(item.pfiVehiclesData)}
+              quantity={item.pfiVehiclesData.length}
+              approved={item.approved}
             />
           )
         })}
@@ -121,12 +140,48 @@ const AllPfiRequestsAdmin = () => {
     })
   }
 
+  const listPfiVehicles = (list) =>{
+    let vehicles = '';
+    list.forEach( item =>{
+      if(vehicles === ''){
+        vehicles += `${item.productBrand}`
+      }else{
+        vehicles += ` | ${item.productBrand}`
+      }
+    })
+    return vehicles
+  }
+
+  const handleChangeEmployees = (e) =>{
+    e.preventDefault();
+    setEmployeeId(e.target.value);
+  }
+
+  useEffect(()=>{
+    pfiRequestQuery.refetch()
+  }, [employeeId])
+
   
   return (
     <Layout>
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All PFI Requests</h3>
+
+          <div className="btn-group me-2">
+            <button className="btn btn-sm border-secondary rounded" type="button" disabled={pfiRequestQuery.isLoading} data-bs-toggle="dropdown" aria-expanded="false">
+              { pfiRequestQuery.isFetching ? <Spinner /> : <i className="bi bi-filter fs-5"></i>} 
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end p-3">
+              <div className=""> 
+                <label htmlFor="subordinates" className="form-label small fw-bold">Filter by Employees</label>
+                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeEmployees} aria-label="Default select example">
+                  <option value="">View All</option>
+                  {!employeeQuery.isLoading && listEmployees()}
+                </select>
+              </div>
+            </ul>
+          </div> 
         </header>
         <p>All PFI Requests are listed below</p>
 

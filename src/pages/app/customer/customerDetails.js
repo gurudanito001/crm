@@ -157,6 +157,8 @@ const CustomerDetails = () => {
           <CustomerDetailListItem title="Customer Type" description={customerDetailsQuery.data.customerType || "----"} />
           <CustomerDetailListItem title="Enquiry Source" description={customerDetailsQuery.data.enquirySource || "----"} />
           <CustomerDetailListItem title="Approved" description={customerDetailsQuery.data.approved ? "Yes" : "No"} />
+          <CustomerDetailListItem title="Date Created" description={new Date(customerDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+          <CustomerDetailListItem title="Last Updated" description={new Date(customerDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
         </ul>}
 
         {contactPersonQuery?.data?.length > 0  && <>

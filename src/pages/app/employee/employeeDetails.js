@@ -116,6 +116,8 @@ const EmployeeDetails = () => {
               <EmployeeDetailListItem title="Location Manager" description={employeeDetailsQuery.data?.locationManager?.fullName || "----"} />
               <EmployeeDetailListItem title="Employment Date" description={new Date(employeeDetailsQuery.data?.employmentDate).toDateString() || "----"} />
               <EmployeeDetailListItem title="Brands Assigned" description={listBrands() || "----"} />
+              <EmployeeDetailListItem title="Date Created" description={new Date(employeeDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+              <EmployeeDetailListItem title="Last Updated" description={new Date(employeeDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
             </ul>}
         </section>}
 

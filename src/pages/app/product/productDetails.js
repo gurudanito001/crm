@@ -118,6 +118,8 @@ const ProductDetails = () => {
                 {productDetailsQuery.data.images.map(image => <img key={image} src={image} className="m-2" alt="Product" width="200px" />)}
               </figure>
             </div>
+            <ProductDetailListItem title="Date Created" description={new Date(productDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <ProductDetailListItem title="Last Updated" description={new Date(productDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
       </section>}
 

@@ -132,6 +132,8 @@ const ProductGroupDetails = () => {
                 {!productsQuery.isLoading && listProducts()}
               </ul>
             </>}
+            <ProductGroupDetailListItem title="Date Created" description={new Date(productGroupDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <ProductGroupDetailListItem title="Last Updated" description={new Date(productGroupDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
       </section>}
 

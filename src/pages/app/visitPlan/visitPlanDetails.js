@@ -102,6 +102,8 @@ const VisitPlanDetails = () => {
             {visitPlanDetailsQuery.data.week && <VisitPlanDetailListItem title="Week" description={visitPlanDetailsQuery.data.week || "----"} />}
             <VisitPlanDetailListItem title="Month" description={visitPlanDetailsQuery.data.month || "----"} />
             <VisitPlanDetailListItem title="Visit Plan" description={visitPlanDetailsQuery.data.description || "----"} />
+            <VisitPlanDetailListItem title="Date Created" description={new Date(visitPlanDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <VisitPlanDetailListItem title="Last Updated" description={new Date(visitPlanDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
       </section>}
 

@@ -123,6 +123,8 @@ const BranchDetails = () => {
             <BranchDetailListItem title="LGA" description={`${branchDetailsQuery.data.lga}` || "----"} />
             <BranchDetailListItem title="State" description={`${branchDetailsQuery.data.state}` || "----"} />
             <BranchDetailListItem title="Head Office?" description={`${branchDetailsQuery.data.isHeadOffice ? "Yes" : "No" }` || "----"} />
+            <BranchDetailListItem title="Date Created" description={new Date(branchDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <BranchDetailListItem title="Last Updated" description={new Date(branchDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
             {/* <div className='d-flex flex-column mt-3'>
               <h6 className='small fw-bold'>Branch Images</h6>
               <figure>

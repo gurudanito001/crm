@@ -85,6 +85,8 @@ const PaymentDetails = () => {
             <PaymentDetailListItem title="WHT Deducted" description={formatAsCurrency(paymentDetailsQuery.data.whtDeducted) || "----"} />
             <PaymentDetailListItem title="VAT Payment Receipt" description={paymentDetailsQuery.data.vatPaymentReceipt || "----"} />
             <PaymentDetailListItem title="Additional Information" description={paymentDetailsQuery.data.additionalInformation || "----"} />
+            <PaymentDetailListItem title="Date Created" description={new Date(paymentDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <PaymentDetailListItem title="Last Updated" description={new Date(paymentDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
       </section>}
 

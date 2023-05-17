@@ -1,10 +1,10 @@
 
-import '../../../styles/auth.styles.css';
-import { Fragment, useState, useEffect } from "react";
+import '../../../styles/auth.styles.css'
+import { Fragment, useEffect, useState } from "react";
 import Layout from "../../../components/layout";
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import { useDispatch } from 'react-redux';
 import { setMessage } from '../../../store/slices/notificationMessagesSlice';
@@ -33,23 +33,15 @@ const CustomerVisitListItem = ({ id, companyName, personToVisitName, meetingDate
 }
 
 
-const AllCustomerVisitsAdmin = () => {
+const AllCustomerVisitsSupervisor = () => {
   const dispatch = useDispatch();
   const {id} = getUserData();
-  const [employeeId, setEmployeeId] = useState("");
+  const [employeeId, setEmployeeId] = useState(id);
   const navigate = useNavigate();
-
-  const deriveUrl = () =>{
-    if(employeeId){
-      return `/customerVisit/employee/${employeeId}`
-    }else{
-      return "/customerVisit"
-    }
-  }
   
   const customerVisitQuery = useQuery({
     queryKey: ["allCustomerVisits"],
-    queryFn: () => apiGet({url: deriveUrl()})
+    queryFn: () => apiGet({url: `/customerVisit/employee/${employeeId}`})
     .then( (res) => res.payload)
     .catch( error =>{
       dispatch(
@@ -62,9 +54,9 @@ const AllCustomerVisitsAdmin = () => {
     })
   })
 
-  const employeeQuery = useQuery({
-    queryKey: ["allEmployees"],
-    queryFn: () => apiGet({url: "/employee"})
+  const subordinatesQuery = useQuery({
+    queryKey: ["allSubordinates"],
+    queryFn: () => apiGet({url: `/employee/subordinates/${id}`})
     .then( (res) => res.payload)
     .catch( error =>{
       dispatch(
@@ -77,10 +69,10 @@ const AllCustomerVisitsAdmin = () => {
     })
   })
 
-  const listEmployees = () =>{
-    if(employeeQuery.data.length > 0){
-      return employeeQuery.data.map(employee =>
-        <option key={employee.id} value={employee.id}>{`${employee.firstName} ${employee.lastName}`}</option>
+  const listSubordinates = () =>{
+    if(subordinatesQuery.data.length > 0){
+      return subordinatesQuery.data.map(subordinate =>
+        <option key={subordinate.id} value={subordinate.id}>{`${subordinate.firstName} ${subordinate.lastName}`}</option>
       )
     }
   }
@@ -102,8 +94,8 @@ const AllCustomerVisitsAdmin = () => {
 
   const getEmployeeData = (id) =>{
     let data = {};
-    if(employeeQuery.data?.length){
-      employeeQuery.data.forEach( item => {
+    if(subordinatesQuery.data?.length){
+      subordinatesQuery.data.forEach( item => {
         if(item.id === id){
           data = {id: item.id, fullName: `${item.firstName} ${item.lastName}`, email: item.email}
         }
@@ -141,13 +133,17 @@ const AllCustomerVisitsAdmin = () => {
     })
   }
 
-  const handleChangeEmployees = (e) =>{
+  const handleChangeSubordinate = (e) =>{
     e.preventDefault();
     setEmployeeId(e.target.value);
+    
   }
 
   useEffect(()=>{
-    customerVisitQuery.refetch()
+    if(employeeId){
+      customerVisitQuery.refetch()
+    }
+    
   }, [employeeId])
 
   return (
@@ -162,22 +158,32 @@ const AllCustomerVisitsAdmin = () => {
             <ul className="dropdown-menu dropdown-menu-end p-3">
               <div className=""> 
                 <label htmlFor="subordinates" className="form-label small fw-bold">Filter by Employees</label>
-                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeEmployees} aria-label="Default select example">
-                  <option value="">View All</option>
-                  {!employeeQuery.isLoading && listEmployees()}
+                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeSubordinate} aria-label="Default select example">
+                  <option value={id}>{`${getUserData().firstName} ${getUserData().lastName}`}</option>
+                  {!subordinatesQuery.isLoading && listSubordinates()}
                 </select>
               </div>
             </ul>
           </div>
+          <div className="btn-group">
+            <button className="btn btn-sm border-secondary rounded" type="button" disabled={customerVisitQuery.isLoading} data-bs-toggle="dropdown" aria-expanded="false">
+              <i className="bi bi-three-dots-vertical fs-5"></i>
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end p-0">
+              <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={customerVisitQuery.isLoading} style={{ height: "40px" }} 
+                onClick={() => navigate("/app/visit/schedule")}>Schedule A Visit</button></li>
+                <li><button className='btn btn-sm btn-light text-dark fw-bold w-100' disabled={customerVisitQuery.isLoading} style={{ height: "40px" }} 
+                onClick={() => navigate("/app/visit/report")}>Create Visit Report</button></li>
+            </ul>
+          </div>
         </header>
         <p>All customer visits are listed below</p>
-        
 
         {customerVisitQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Customer Visits <Spinner />
         </div>}
         <ul className='mt-5'>
-          {!customerVisitQuery.isLoading && !employeeQuery.isLoading && listSortedCustomerVisits()}
+          {!customerVisitQuery.isLoading && !subordinatesQuery.isLoading && listSortedCustomerVisits()}
 
           {!customerVisitQuery.isLoading && !customerVisitQuery.isError && customerVisitQuery?.data?.length === 0 && <div className='bg-light rounded border border-secondary p-5'>
               <p className='h6 fw-bold'>No Customer Visit was found !!</p>
@@ -189,4 +195,4 @@ const AllCustomerVisitsAdmin = () => {
   )
 }
 
-export default AllCustomerVisitsAdmin;
+export default AllCustomerVisitsSupervisor;

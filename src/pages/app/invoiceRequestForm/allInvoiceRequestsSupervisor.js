@@ -12,7 +12,7 @@ import { getUserData } from '../../../services/localStorageService';
 
 
 
-const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicles, quantity, approved  }) =>{
+const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, vehicleModel, quantity  }) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/invoiceRequest/${id}`)}>
@@ -21,35 +21,27 @@ const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicles, quant
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{invoiceName}</span>
           <span>{contactPerson}</span>
-          <span>{vehicles}</span>
+          <span>{vehicleBrand} - {vehicleModel}</span>
         </article>
       </div>
-      <div className='w-25 d-flex flex-column align-items-center'>
-        <span className='small fw-bold ms-auto mt-auto'>{quantity} vehicle brand(s)</span>
-        <span className={`small fw-bold ms-auto mb-auto ${approved ? "text-success" : "text-danger"}`}>{approved ? "Approved" : "Not Approved"}</span>
+      <div className='w-25 d-flex align-items-center'>
+        <span className='small fw-bold ms-auto'>{quantity} units</span>
       </div>
     </li>
   )
 }
 
 
-const AllInvoiceRequestsAdmin = () => {
+const AllInvoiceRequestsSupervisor = () => {
   const dispatch = useDispatch();
   const {staffCadre, id} = getUserData();
   const [employeeId, setEmployeeId] = useState("");
   const navigate = useNavigate();
 
-  const deriveUrl = () =>{
-    if(employeeId){
-      return `/invoiceRequestForm/employee/${employeeId}`
-    }else{
-      return "/invoiceRequestForm"
-    }
-  }
 
   const invoiceRequestQuery = useQuery({
     queryKey: ["allInvoiceRequests"],
-    queryFn: () => apiGet({url: deriveUrl()})
+    queryFn: () => apiGet({url: `/invoiceRequestForm/employee/${employeeId}`})
     .then( res => res.payload)
     .catch( error => {
       dispatch(
@@ -62,9 +54,9 @@ const AllInvoiceRequestsAdmin = () => {
     })
   })
 
-  const employeeQuery = useQuery({
-    queryKey: ["allEmployees"],
-    queryFn: () => apiGet({url: "/employee"})
+  const subordinatesQuery = useQuery({
+    queryKey: ["allSubordinates"],
+    queryFn: () => apiGet({url: `/employee/subordinates/${id}`})
     .then( (res) => res.payload)
     .catch( error =>{
       dispatch(
@@ -77,10 +69,10 @@ const AllInvoiceRequestsAdmin = () => {
     })
   })
 
-  const listEmployees = () =>{
-    if(employeeQuery.data.length > 0){
-      return employeeQuery.data.map(employee =>
-        <option key={employee.id} value={employee.id}>{`${employee.firstName} ${employee.lastName}`}</option>
+  const listSubordinates = () =>{
+    if(subordinatesQuery.data.length > 0){
+      return subordinatesQuery.data.map(subordinate =>
+        <option key={subordinate.id} value={subordinate.id}>{`${subordinate.firstName} ${subordinate.lastName}`}</option>
       )
     }
   }
@@ -101,8 +93,8 @@ const AllInvoiceRequestsAdmin = () => {
 
   const getEmployeeData = (id) =>{
     let data = {};
-    if(employeeQuery.data?.length){
-      employeeQuery.data.forEach( item => {
+    if(subordinatesQuery.data?.length){
+      subordinatesQuery.data.forEach( item => {
         if(item.id === id){
           data = {id: item.id, fullName: `${item.firstName} ${item.lastName}`, email: item.email}
         }
@@ -129,9 +121,9 @@ const AllInvoiceRequestsAdmin = () => {
               id={item.id}
               invoiceName={item.invoiceName}
               contactPerson={item.contactPerson}
-              vehicles={listInvoiceVehicles(item.vehiclesData)}
-              quantity={item.vehiclesData.length}
-              approved={item.approved}
+              vehicleBrand={item.vehicleBrand}
+              vehicleModel={item.vehicleModel}
+              quantity={item.quantity}
             />
           )
         })}
@@ -140,26 +132,14 @@ const AllInvoiceRequestsAdmin = () => {
     })
   }
 
-  const listInvoiceVehicles = (list) =>{
-    console.log(list)
-    let vehicles = '';
-    list.forEach( item =>{
-      if(vehicles === ''){
-        vehicles += `${item.vehicleBrand}`
-      }else{
-        vehicles += ` | ${item.vehicleBrand}`
-      }
-    })
-    return vehicles
-  }
-
-  const handleChangeEmployees = (e) =>{
+  const handleChangeSubordinate = (e) =>{
     e.preventDefault();
     setEmployeeId(e.target.value);
+    
   }
 
   useEffect(()=>{
-    invoiceRequestQuery.refetch()
+      invoiceRequestQuery.refetch()
   }, [employeeId])
 
 
@@ -175,13 +155,13 @@ const AllInvoiceRequestsAdmin = () => {
             <ul className="dropdown-menu dropdown-menu-end p-3">
               <div className=""> 
                 <label htmlFor="subordinates" className="form-label small fw-bold">Filter by Employees</label>
-                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeEmployees} aria-label="Default select example">
-                  <option value="">View All</option>
-                  {!employeeQuery.isLoading && listEmployees()}
+                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeSubordinate} aria-label="Default select example">
+                  <option value={id}>{`${getUserData().firstName} ${getUserData().lastName}`}</option>
+                  {!subordinatesQuery.isLoading && listSubordinates()}
                 </select>
               </div>
             </ul>
-          </div> 
+          </div>
         </header>
         <p>All Invoice Requests are listed below</p>
 
@@ -203,4 +183,4 @@ const AllInvoiceRequestsAdmin = () => {
   )
 }
 
-export default AllInvoiceRequestsAdmin;
+export default AllInvoiceRequestsSupervisor;

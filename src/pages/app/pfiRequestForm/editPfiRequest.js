@@ -1,12 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { apiPost, apiPut, apiGet } from '../../../services/apiService';
+import { apiPut, apiGet } from '../../../services/apiService';
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Spinner } from '../../../components/spinner';
 import formatAsCurrency from "../../../services/formatAsCurrency";
 import { useDispatch } from 'react-redux';
 import { setMessage } from '../../../store/slices/notificationMessagesSlice';
+import NaijaStates from 'naija-state-local-government';
+import formValidator from "../../../services/validation";
+
 
 const EditPfiRequestDetails = ({ data, handleCancel }) => {
   const { id } = useParams();
@@ -23,7 +26,7 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
       );
       queryClient.invalidateQueries(["allPfiRequests"])
       handleCancel()
-    }).catch( error =>{
+    }).catch(error => {
       dispatch(
         setMessage({
           severity: "error",
@@ -35,11 +38,26 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
   })
 
   const [formData, setFormData] = useState({
+    customerType: "",
+    employeeId: "",
+    customerId: "",
     companyName: "",
     contactPerson: "",
     mobile: "",
     companyAddress: "",
     emailAddress: "",
+    pfiVehiclesData: [],
+    refundRebaseRecipient: "",
+    designation: "",
+    relationshipWithTransaction: "",
+    estimatedOrderClosingTime: "",
+    deliveryPeriod: "",
+    paymentType: "",
+    deliveryLocation: "",
+    additionalInformation: "",
+  })
+
+  let emptyVehicleDetailsObject = {
     productBrand: "",
     vehicleModel: "",
     bodyTypeDescription: "",
@@ -53,27 +71,14 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
     whtDeduction: false,
     registration: false,
     refundRebaseAmount: "",
-    refundRebaseRecipient: "",
-    designation: "",
-    relationshipWithTransaction: "",
-    estimatedOrderClosingTime: "",
-    deliveryPeriod: "",
-    paymentType: "",
-    deliveryLocation: "",
-    additionalInformation: "",
-  })
+  }
+
+  const [vehicleDatails, setVehicleDetails] = useState(emptyVehicleDetailsObject)
 
   const [errors, setErrors] = useState({});
+  const [vehicleDatailsErrors, setVehicleDetailsErrors] = useState({});
+  const [contactPersons, setContactPersons] = useState([])
 
-  useEffect(() => {
-    setFormData(prevState => ({
-      ...prevState,
-      ...data,
-      whtDeduction: convertStringToBoolean(data.whtDeduction),
-      vatDeduction: convertStringToBoolean(data.vatDeduction),
-      registration: convertStringToBoolean(data.registration)
-    }))
-  }, [])
 
   const convertStringToBoolean = (value) => {
     if (value === "true") {
@@ -85,106 +90,33 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
     }
   }
 
-  const [contactPersons, setContactPersons] = useState([])
-  const [products, setProducts] = useState([])
+  useEffect(() => {
+    console.log(data)
+    setFormData(prevState => ({
+      ...prevState,
+      ...data,
+      whtDeduction: convertStringToBoolean(data.whtDeduction),
+      vatDeduction: convertStringToBoolean(data.vatDeduction),
+      registration: convertStringToBoolean(data.registration)
+    }))
+  }, [])
 
+  /* useEffect(() => {
+    if (formData.companyName && formData.customerType === "existing customer") {
+      let customerId = getCustomerIdBy(formData.companyName);
+      setFormData(prevState => ({
+        ...prevState,
+        customerId
+      }))
+    }
+  }, [formData.companyName]) */
 
   const customerQuery = useQuery({
     queryKey: ["allCustomers"],
-    queryFn: () => apiGet({ url: "/customer" })
-    .then((res) => res.payload)
-    .catch( error =>{
-      dispatch(
-        setMessage({
-          severity: "error",
-          message: error.message,
-          key: Date.now(),
-        })
-      );
-    })
-  })
-
-  const listCustomerOptions = () => {
-    if (customerQuery?.data?.length) {
-      return customerQuery.data.map(customer =>
-        <option key={customer.id} value={customer.companyName}>{customer.companyName}</option>
-      )
-    }
-  }
-
-  const productGroupQuery = useQuery({
-    queryKey: ["allProductGroups"],
-    queryFn: () => apiGet({ url: "/productGroup" })
-    .then((res) => res.payload)
-    .catch( error =>{
-      dispatch(
-        setMessage({
-          severity: "error",
-          message: error.message,
-          key: Date.now(),
-        })
-      );
-    })
-  })
-
-  const listProductGroupOptions = () => {
-    if (productGroupQuery?.data?.length) {
-      return productGroupQuery.data.map(productGroup =>
-        <option key={productGroup.id} value={productGroup.name}>{productGroup.name}</option>
-      )
-    }
-  }
-
-  const getProductGroupData = (name) => {
-    let data = {}
-    if (!productGroupQuery.isLoading) {
-      productGroupQuery.data.forEach(productGroup => {
-        if (productGroup.name === name) {
-          data = productGroup
-        }
-      })
-    }
-    return data
-  }
-
-  useEffect(() => {
-    let companyName = formData.companyName;
-    let companyId = getCompanyData(companyName).id
-    if (companyId) {
-      fetchContactPersons(companyId)
-    }
-    setFormData(prevState => ({
-      ...prevState,
-      companyAddress: getCompanyData(companyName).address1 || data.companyAddress
-    }))
-  }, [formData.companyName])
-
-  useEffect(() => {
-    let contactPerson = formData.contactPerson;
-    let contactPersonData = getContactPersonData(contactPerson);
-    console.log(contactPersonData)
-    setFormData(prevState => ({
-      ...prevState,
-      mobile: contactPersonData.phoneNumber1 || data.mobile,
-      emailAddress: contactPersonData.email || data.emailAddress,
-      designation: contactPersonData.designation || data.designation,
-    }))
-  }, [formData.contactPerson])
-
-
-
-  useEffect(() => {
-    let productGroup = formData.productBrand;
-    let productGroupData = getProductGroupData(productGroup);
-    if (productGroup && productGroupQuery.data?.length) {
-      fetchProducts(productGroupData.id)
-    }
-  }, [formData.productBrand])
-
-  const fetchProducts = (id) => {
-    apiGet({ url: `/product/productGroup/${id}` })
-      .then(res => {
-        setProducts(res.payload)
+    queryFn: () => apiGet({ url: `/customer/employee/${data.employeeId}` })
+      .then((res) => {
+        console.log(res.payload)
+        return res.payload
       })
       .catch(error => {
         dispatch(
@@ -195,15 +127,101 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
           })
         );
       })
+  })
+
+  /* const getCustomerIdBy = (companyName) => {
+    let customerId;
+    customerQuery?.data?.forEach(customer => {
+      if (customer.companyName === companyName) {
+        customerId = customer.id
+      }
+    })
+    return customerId
+  } */
+
+  const listCustomerOptions = () => {
+    if (customerQuery?.data?.length) {
+      return customerQuery.data.map(customer =>
+        <option key={customer.id} value={customer.companyName}>{customer.companyName}</option>
+      )
+    }
   }
 
-  const listProducts = () => {
-    if (products.length > 0) {
-      return products.map(product =>
+  const productQuery = useQuery({
+    queryKey: ["allProducts"],
+    queryFn: () => apiGet({ url: "/product" })
+      .then((res) => res.payload)
+      .catch(error => {
+        dispatch(
+          setMessage({
+            severity: "error",
+            message: error.message,
+            key: Date.now(),
+          })
+        );
+      })
+  })
+
+  const listProductOptions = () => {
+    if (productQuery?.data?.length) {
+      return productQuery.data.map(product =>
         <option key={product.id} value={product.name}>{product.name}</option>
       )
     }
   }
+  const deleteProduct = (product) => {
+    let productBrands = formData.productBrands;
+    productBrands = productBrands.filter(item => item !== product);
+    setFormData(prevState => ({
+      ...prevState,
+      productBrands
+    }))
+  }
+
+  const listProductsAsCards = () => {
+    if (formData.productBrands.length > 0) {
+      return formData.productBrands.map((product) => <li key={product} className='m-2 d-flex align-items-start border p-3 rounded'>
+        <span>{product}</span>
+        <button onClick={() => deleteProduct(product)} style={{ width: "10px", height: "20px", borderRadius: "14px", background: "rgba(0, 0, 0, 0.693)", position: "relative", top: "-25px", left: "25px" }}
+          className='btn d-flex align-items-center justify-content-center text-white'><i className="bi bi-x"></i></button>
+      </li>)
+    }
+  }
+
+  const listStateOptions = () => {
+    return NaijaStates.states().map(state =>
+      <option key={state} value={state}>{state}</option>
+    )
+  }
+
+  useEffect(() => {
+    let companyName = formData.companyName;
+    let {id, address1} = getCompanyData(companyName)
+    if(address1){
+      setFormData(prevState => ({
+        ...prevState,
+        companyAddress: address1
+      }))
+    }
+    let companyId = id ||formData.customerId
+    if (companyId) {
+      fetchContactPersons(companyId)
+    }
+  }, [formData.companyName])
+
+  useEffect(() => {
+    let contactPerson = formData.contactPerson;
+    if (formData.customerType === "existing customer") {
+      let contactPersonData = getContactPersonData(contactPerson);
+      if(contactPersonData){
+        setFormData(prevState => ({
+          ...prevState,
+          mobile: contactPersonData.phoneNumber1,
+          emailAddress: contactPersonData.email,
+        }))
+      }
+    }
+  }, [formData.contactPerson])
 
   const getCompanyData = (name) => {
     let data = {}
@@ -254,18 +272,43 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
   }
 
   const handleChange = (props) => (event) => {
-    if (props === "registration" || props === "vatDeduction" || props === "whtDeduction") {
+
+    setFormData(prevState => ({
+      ...prevState,
+      [props]: event.target.value
+    }))
+    setErrors(prevState => ({
+      ...prevState,
+      [props]: ""
+    }))
+
+    if (props === "customerType") {
       setFormData(prevState => ({
+        ...prevState,
+        companyName: "",
+        companyAddress: "",
+        contactPerson: "",
+        mobile: "",
+        emailAddress: "",
+        customerId: ""
+      }))
+    }
+  }
+
+  const handleChangeVehicleDetails = (props) => (event) => {
+
+    if (props === "registration" || props === "vatDeduction" || props === "whtDeduction") {
+      setVehicleDetails(prevState => ({
         ...prevState,
         [props]: !prevState[props]
       }))
       return
     }
-    setFormData(prevState => ({
+    setVehicleDetails(prevState => ({
       ...prevState,
       [props]: event.target.value
     }))
-    setErrors( prevState => ({
+    setVehicleDetailsErrors(prevState => ({
       ...prevState,
       [props]: ""
     }))
@@ -274,7 +317,95 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // return console.log(formData);
+
+    let errors = formValidator(["customerType", "companyName", "companyAddress", "contactPerson", "mobile", "emailAddress", "deliveryPeriod", "paymentType", "deliveryLocation", "pfiVehiclesData"], formData);
+    if (Object.keys(errors).length > 0) {
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      console.log(errors)
+      return setErrors(errors);
+    }
     pfiRequestMutation.mutate()
+  }
+
+  const handleSubmitVehicleDetails = (e) => {
+    e.preventDefault();
+    //return console.log(vehicleDatails);
+
+    let errors = formValidator(["productBrand", "vehicleModel", "quantity", "priceOfVehicle"], vehicleDatails);
+    if (Object.keys(errors).length > 0) {
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: "Form Validation Error",
+          key: Date.now(),
+        })
+      );
+      console.log(errors)
+      return setVehicleDetailsErrors(errors);
+    }
+    let vehicles = formData.pfiVehiclesData;
+    vehicles.push(vehicleDatails);
+    setFormData(prevState => ({
+      ...prevState,
+      pfiVehiclesData: vehicles
+    }))
+    setVehicleDetails(emptyVehicleDetailsObject);
+    console.log(formData)
+  }
+
+  const listVehiclesInPfiForm = () => {
+    if (formData.pfiVehiclesData.length > 0) {
+      return formData.pfiVehiclesData.map((item, index) => (
+        <li key={index} className={`h6 d-flex align-items-center border rounded p-3 m-2 ${vehicleDatails.index === index && "border-primary"}`}>
+          <span className='me-auto'>{item.quantity} {item.productBrand} for {formatAsCurrency(item.priceOfVehicle)} each</span>
+          <i className="bi bi-trash fs-4 px-2" style={{ cursor: "pointer" }} title="Delete" onClick={() => deleteVehicleInPfiForm(index)}></i>
+          <i className="bi bi-pencil-square fs-4 px-2" style={{ cursor: "pointer" }} onClick={() => onClickEdit(item, index)} title="Edit"></i>
+        </li>
+      ))
+    }
+  }
+
+  const deleteVehicleInPfiForm = (vehicleIndex) => {
+    let vehicles = formData.pfiVehiclesData;
+    vehicles = vehicles.filter((vehicle, index) => index !== vehicleIndex)
+    setFormData(prevState => ({
+      ...prevState,
+      pfiVehiclesData: vehicles
+    }))
+  }
+
+  const onClickEdit = (item, index) => {
+    console.log(index)
+    setVehicleDetails({
+      index: index,
+      ...item
+    })
+  }
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault()
+    let vehicles = formData.pfiVehiclesData;
+    let index = vehicleDatails.index;
+    let data = vehicleDatails;
+    delete data.index;
+    vehicles[index] = data;
+
+    setFormData(prevState => ({
+      ...prevState,
+      pfiVehiclesData: vehicles
+    }))
+    setVehicleDetails(emptyVehicleDetailsObject)
+  }
+
+  const handleCancelEdit = (e) => {
+    e.preventDefault()
+    setVehicleDetails(emptyVehicleDetailsObject);
   }
 
   return (
@@ -284,13 +415,23 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
 
       <form className="mt-5">
         <div className="mb-3">
+          <select className="form-select shadow-none" id="customerType" onChange={handleChange("customerType")} value={formData.customerType} aria-label="Default select example">
+            <option value="">Select Customer Type</option>
+            <option value="existing customer">Existing Customer</option>
+            <option value="new customer">New Customer</option>
+          </select>
+        </div>
+
+        <div className="mb-3">
           <label htmlFor="companyName" className="form-label">Company Name (<span className='fst-italic text-warning'>required</span>)</label>
           <div className='d-flex align-items-center'>
-            <select className="form-select shadow-none" id="companyName" onChange={handleChange("companyName")} value={formData.companyName} aria-label="Default select example">
-              <option value="">Select Company</option>
-              {!customerQuery.isLoading && listCustomerOptions()}
-            </select>
-            <input type="text" className="form-control shadow-none ms-2" value={formData.companyName} onChange={handleChange("companyName")} id="companyName" placeholder="Custom Company Name" />
+            {formData.customerType === "existing customer" ?
+              <select className="form-select shadow-none" id="companyName" onChange={handleChange("companyName")} value={formData.companyName} aria-label="Default select example">
+                <option value="">Select Company</option>
+                {!customerQuery.isLoading && listCustomerOptions()}
+              </select> :
+              <input type="text" className="form-control shadow-none" value={formData.companyName} onChange={handleChange("companyName")} id="companyName" placeholder="New Company Name" />
+            }
           </div>
           <span className='text-danger font-monospace small'>{errors.companyName}</span>
         </div>
@@ -302,11 +443,13 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
         <div className="mb-3">
           <label htmlFor="contactPerson" className="form-label">Contact Person (<span className='fst-italic text-warning'>required</span>)</label>
           <div className='d-flex align-items-center'>
-            <select className="form-select shadow-none" id="contactPerson" onChange={handleChange("contactPerson")} value={formData.contactPerson} aria-label="Default select example">
-              <option value="">Contact Person</option>
-              {contactPersons.length > 0 && listContactPerson()}
-            </select>
-            <input type="text" className="form-control shadow-none ms-2" value={formData.contactPerson} onChange={handleChange("contactPerson")} id="contactPerson" placeholder="Custom Contact Person" />
+            {formData.customerType === "existing customer" ?
+              <select className="form-select shadow-none" id="contactPerson" onChange={handleChange("contactPerson")} value={formData.contactPerson} aria-label="Default select example">
+                <option value="">Contact Person</option>
+                {contactPersons.length > 0 && listContactPerson()}
+              </select> :
+              <input type="text" className="form-control shadow-none" value={formData.contactPerson} onChange={handleChange("contactPerson")} id="contactPerson" placeholder="Firstname Lastname" />
+            }
           </div>
           <span className='text-danger font-monospace small'>{errors.contactPerson}</span>
         </div>
@@ -316,87 +459,122 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
           <span className='text-danger font-monospace small'>{errors.mobile}</span>
         </div>
         <div className="mb-3">
-          <label htmlFor="designation" className="form-label">Designation</label>
-          <input type="text" className="form-control shadow-none" value={formData.designation} onChange={handleChange("designation")} id="designation" placeholder="Designation" />
-          <span className='text-danger font-monospace small'>{errors.designation}</span>
-        </div>
-        <div className="mb-3">
           <label htmlFor="emailAddress" className="form-label">Email Address (<span className='fst-italic text-warning'>required</span>)</label>
           <input type="text" className="form-control shadow-none" value={formData.emailAddress} onChange={handleChange("emailAddress")} id="emailAddress" placeholder="Email Address" />
           <span className='text-danger font-monospace small'>{errors.emailAddress}</span>
         </div>
-        <div className="mb-3">
-          <label htmlFor="productBrand" className="form-label">Product Brand (<span className='fst-italic text-warning'>required</span>)</label>
-          <div className='d-flex align-items-center'>
-            <select className="form-select shadow-none" value={formData.productBrand} onChange={handleChange("productBrand")} id="productBrand" aria-label="Default select example">
-              <option value="">Select Product Brand</option>
-              {!productGroupQuery.isLoading && listProductGroupOptions()}
-            </select>
-            <input type="text" className="form-control shadow-none ms-2" value={formData.productBrand} onChange={handleChange("productBrand")} id="productBrand" placeholder="Custom Product Brand" />
+        <div>
+          <h6 className='fw-bold'>Vehicles</h6>
+          <ul>
+            {listVehiclesInPfiForm()}
+          </ul>
+        </div>
+
+
+
+        <section className='border border-primary rounded p-3 p-lg-4 my-5'>
+          <h5 className='mb-2'>{vehicleDatails.index !== undefined ? "Edit" : "Add New"} Vehicle Details</h5>
+          <p className='lead mb-3'>This form in the blue box should be filled for <strong>each vehicle brand</strong>  in the PFI Request</p>
+          <div className="mb-3">
+            <label htmlFor="productBrand" className="form-label">Product Brand (<span className='fst-italic text-warning'>required</span>)</label>
+            <div className='d-flex align-items-center'>
+              <select className="form-select shadow-none" value={vehicleDatails.productBrand} onChange={handleChangeVehicleDetails("productBrand")} id="productBrand" aria-label="Default select example">
+                <option value="">Select Product Brand</option>
+                {!productQuery.isLoading && listProductOptions()}
+              </select>
+            </div>
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.productBrand}</span>
+            {/* {formData.productBrands.length > 0 &&
+                <div className='my-2'>
+                  <h6 className='small fw-bold'>Product Brands</h6>
+                  <ul className='d-flex flex-wrap align-items-center'>{listProductsAsCards()}</ul>
+                </div>} */}
           </div>
-          <span className='text-danger font-monospace small'>{errors.productBrand}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="vehicleModel" className="form-label">Vehicle Model Specific Details (<span className='fst-italic text-warning'>required</span>)</label>
-          <textarea className="form-control shadow-none" value={formData.vehicleModel} onChange={handleChange("vehicleModel")} id="vehicleModel" rows={3}></textarea>
-          <span className='text-danger font-monospace small'>{errors.vehicleModel}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="bodyTypeDescription" className="form-label">Body Type Description / Any Extra Requirement Detail</label>
-          <textarea className="form-control shadow-none" value={formData.bodyTypeDescription} onChange={handleChange("bodyTypeDescription")} id="bodyTypeDescription" rows={3}></textarea>
-          <span className='text-danger font-monospace small'>{errors.bodyTypeDescription}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="vehicleServiceDetails" className="form-label">Any Vehicle Service Given Details</label>
-          <textarea className="form-control shadow-none" value={formData.vehicleServiceDetails} onChange={handleChange("vehicleServiceDetails")} id="vehicleServiceDetails" rows={3}></textarea>
-          <span className='text-danger font-monospace small'>{errors.vehicleServiceDetails}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="vehicleSpecialFitmentDetails" className="form-label">Body / Special Fitment details (please be specific)</label>
-          <textarea className="form-control shadow-none" value={formData.vehicleSpecialFitmentDetails} onChange={handleChange("vehicleSpecialFitmentDetails")} id="vehicleSpecialFitmentDetails" rows={3}></textarea>
-          <span className='text-danger font-monospace small'>{errors.vehicleSpecialFitmentDetails}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="costOfBodySpecialFitment" className="form-label">Cost for Body/Super Structure/Special Fitment <span className='ms-3 fw-bold'>{formatAsCurrency(formData.costOfBodySpecialFitment)}</span></label>
-          <input type="number" className="form-control shadow-none" value={formData.costOfBodySpecialFitment} onChange={handleChange("costOfBodySpecialFitment")} id="costOfBodySpecialFitment" placeholder="Cost Of Body Special Fitment" />
-          <span className='text-danger font-monospace small'>{errors.costOfBodySpecialFitment}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="quantity" className="form-label">Quantity  (<span className='fst-italic text-warning'>required</span>)</label>
-          <input type="number" className="form-control shadow-none" value={formData.quantity} onChange={handleChange("quantity")} id="quantity" placeholder="Quantity of Products" />
-          <span className='text-danger font-monospace small'>{errors.quantity}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="priceOfVehicle" className="form-label">Price of Vehicle (<span className='fst-italic text-warning'>required</span>)<span className='ms-3 fw-bold'>{formatAsCurrency(formData.priceOfVehicle)}</span></label>
-          <input type="number" className="form-control shadow-none" value={formData.priceOfVehicle} onChange={handleChange("priceOfVehicle")} id="priceOfVehicle" placeholder="Price of Vehicle" />
-          <span className='text-danger font-monospace small'>{errors.priceOfVehicle}</span>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="discount" className="form-label">Discount, if any</label>
-          <input type="text" className="form-control shadow-none" value={formData.discount} onChange={handleChange("discount")} id="discount" placeholder="Discount" />
-        </div>
-        <div className="form-check mb-3">
-          <input className="form-check-input shadow-none" type="checkbox" checked={formData.vatDeduction} onChange={handleChange("vatDeduction")} id="vatDeduction" />
-          <label className="form-check-label" htmlFor="vatDeduction">
-            VAT Deduction
-          </label>
-        </div>
-        <div className="form-check mb-3">
-          <input className="form-check-input shadow-none" type="checkbox" checked={formData.whtDeduction} onChange={handleChange("whtDeduction")} id="whtDeduction" />
-          <label className="form-check-label" htmlFor="whtDeduction">
-            WHT Deduction
-          </label>
-        </div>
-        <div className="form-check mb-3">
-          <input className="form-check-input shadow-none" type="checkbox" checked={formData.registration} onChange={handleChange("registration")} id="registration" />
-          <label className="form-check-label" htmlFor="registration">
-            Registration
-          </label>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="refundRebaseAmount" className="form-label">Refund/Rebate amount, if any  <span className='ms-3 fw-bold'>{formatAsCurrency(formData.refundRebaseAmount)}</span></label>
-          <input type="text" className="form-control shadow-none" value={formData.refundRebaseAmount} onChange={handleChange("refundRebaseAmount")} id="refundRebaseAmount" placeholder="Amount to be Refunded" />
-        </div>
+          <div className="mb-3">
+            <label htmlFor="vehicleModel" className="form-label">Vehicle Model Specific Details (<span className='fst-italic text-warning'>required</span>)</label>
+            <textarea className="form-control shadow-none" value={vehicleDatails.vehicleModel} onChange={handleChangeVehicleDetails("vehicleModel")} id="vehicleModel" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.vehicleModel}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="bodyTypeDescription" className="form-label">Body Type Description / Any Extra Requirement Detail</label>
+            <textarea className="form-control shadow-none" value={vehicleDatails.bodyTypeDescription} onChange={handleChangeVehicleDetails("bodyTypeDescription")} id="bodyTypeDescription" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.bodyTypeDescription}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="vehicleServiceDetails" className="form-label">Any Vehicle Service Given Details</label>
+            <textarea className="form-control shadow-none" value={vehicleDatails.vehicleServiceDetails} onChange={handleChangeVehicleDetails("vehicleServiceDetails")} id="vehicleServiceDetails" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.vehicleServiceDetails}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="vehicleSpecialFitmentDetails" className="form-label">Body / Special Fitment details (please be specific)</label>
+            <textarea className="form-control shadow-none" value={vehicleDatails.vehicleSpecialFitmentDetails} onChange={handleChangeVehicleDetails("vehicleSpecialFitmentDetails")} id="vehicleSpecialFitmentDetails" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.vehicleSpecialFitmentDetails}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="costOfBodySpecialFitment" className="form-label">Cost for Body/Super Structure/Special Fitment <span className='ms-3 fw-bold'>{formatAsCurrency(vehicleDatails.costOfBodySpecialFitment)}</span></label>
+            <input type="number" className="form-control shadow-none" value={vehicleDatails.costOfBodySpecialFitment} onChange={handleChangeVehicleDetails("costOfBodySpecialFitment")} id="costOfBodySpecialFitment" placeholder="Cost Of Body Special Fitment" />
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.costOfBodySpecialFitment}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="quantity" className="form-label">Quantity  (<span className='fst-italic text-warning'>required</span>)</label>
+            <input type="number" className="form-control shadow-none" value={vehicleDatails.quantity} onChange={handleChangeVehicleDetails("quantity")} id="quantity" placeholder="Quantity of Products" />
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.quantity}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="priceOfVehicle" className="form-label">Price Per Vehicle (<span className='fst-italic text-warning'>required</span>)<span className='ms-3 fw-bold'>{formatAsCurrency(vehicleDatails.priceOfVehicle)}</span></label>
+            <input type="number" className="form-control shadow-none" value={vehicleDatails.priceOfVehicle} onChange={handleChangeVehicleDetails("priceOfVehicle")} id="priceOfVehicle" placeholder="Price of Vehicle" />
+            <span className='text-danger font-monospace small'>{vehicleDatailsErrors.priceOfVehicle}</span>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="discount" className="form-label">Discount, if any</label>
+            <input type="text" className="form-control shadow-none" value={vehicleDatails.discount} onChange={handleChangeVehicleDetails("discount")} id="discount" placeholder="Discount" />
+          </div>
+          <div className="form-check mb-3">
+            <input className="form-check-input shadow-none" type="checkbox" checked={vehicleDatails.vatDeduction} onChange={handleChangeVehicleDetails("vatDeduction")} id="vatDeduction" />
+            <label className="form-check-label" htmlFor="vatDeduction">
+              VAT Deduction
+            </label>
+          </div>
+          <div className="form-check mb-3">
+            <input className="form-check-input shadow-none" type="checkbox" checked={vehicleDatails.whtDeduction} onChange={handleChangeVehicleDetails("whtDeduction")} id="whtDeduction" />
+            <label className="form-check-label" htmlFor="whtDeduction">
+              WHT Deduction
+            </label>
+          </div>
+          <div className="form-check mb-3">
+            <input className="form-check-input shadow-none" type="checkbox" checked={vehicleDatails.registration} onChange={handleChangeVehicleDetails("registration")} id="registration" />
+            <label className="form-check-label" htmlFor="registration">
+              Registration
+            </label>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="refundRebaseAmount" className="form-label">Refund/Rebate amount, if any  <span className='ms-3 fw-bold'>{formatAsCurrency(vehicleDatails.refundRebaseAmount)}</span></label>
+            <input type="text" className="form-control shadow-none" value={vehicleDatails.refundRebaseAmount} onChange={handleChangeVehicleDetails("refundRebaseAmount")} id="refundRebaseAmount" placeholder="Amount to be Refunded" />
+          </div>
+
+          <div className="d-flex mt-5">
+            {vehicleDatails.index !== undefined ?
+              <>
+                <button className="btn btn-primary ms-auto me-3 px-5" onClick={handleSaveEdit}>Save Changes</button>
+                <button className="btn btn-secondary me-auto ms-3 px-5" onClick={handleCancelEdit}>Cancel</button>
+              </> :
+              <button className="btn btn-primary mx-auto px-5" onClick={handleSubmitVehicleDetails}>Add Vehicle to PFI Request</button>}
+          </div>
+
+          <div className='text-center mt-4'>
+            <span className='text-danger font-monospace'>{errors.pfiVehiclesData && "You must add at least one vehicle to the pfi request"}</span>
+          </div>
+        </section>
+
+
+
+
+
+
+
+
+
+
         <div className="mb-3">
           <label htmlFor="refundRebaseRecipient" className="form-label">Person name receiving refund/rebate</label>
           <input type="text" className="form-control shadow-none" value={formData.refundRebaseRecipient} onChange={handleChange("refundRebaseRecipient")} id="refundRebaseRecipient" placeholder="Person to be Refunded" />
@@ -427,14 +605,22 @@ const EditPfiRequestDetails = ({ data, handleCancel }) => {
           </select>
           <span className='text-danger font-monospace small'>{errors.paymentType}</span>
         </div>
+        {/* <div className="mb-3">
+            <label htmlFor="deliveryLocation" className="form-label">Delivery Location (<span className='fst-italic text-warning'>required</span>)</label>
+            <textarea className="form-control shadow-none" value={formData.deliveryLocation} onChange={handleChange("deliveryLocation")} id="deliveryLocation" rows={3}></textarea>
+            <span className='text-danger font-monospace small'>{errors.deliveryLocation}</span>  
+          </div> */}
         <div className="mb-3">
           <label htmlFor="deliveryLocation" className="form-label">Delivery Location (<span className='fst-italic text-warning'>required</span>)</label>
-          <textarea className="form-control shadow-none" value={formData.deliveryLocation} onChange={handleChange("deliveryLocation")} id="deliveryLocation" rows={3}></textarea>
+          <select className="form-select shadow-none" value={formData.deliveryLocation} onChange={handleChange("deliveryLocation")} id="deliveryLocation" aria-label="Default select example">
+            <option value="">Select Delivery Location</option>
+            {listStateOptions()}
+          </select>
           <span className='text-danger font-monospace small'>{errors.deliveryLocation}</span>
         </div>
         <div className="mb-3">
           <label htmlFor="deliveryLocation" className="form-label">Additional Information</label>
-          <textarea className="form-control shadow-none" value={formData.additionalInformation} onChange={handleChange("additionalInformation")} id="deliveryLocation" rows={3}></textarea>
+          <textarea className="form-control shadow-none" value={formData.additionalInformation} onChange={handleChange("additionalInformation")} id="deliveryLocation" rows={6}></textarea>
         </div>
 
         <div className="d-flex mt-5">

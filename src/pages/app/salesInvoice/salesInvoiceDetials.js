@@ -104,6 +104,8 @@ const SalesInvoiceDetails = () => {
           <ul className='mt-5'>
             <SalesInvoiceDetailsListItem title="PDF Url" description={salesInvoiceDetailsQuery.data.invoiceNumber || "----"} />
             <SalesInvoiceDetailsListItem title="Description" description={salesInvoiceDetailsQuery.data.description || "----"} />
+            <SalesInvoiceDetailsListItem title="Date Created" description={new Date(salesInvoiceDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <SalesInvoiceDetailsListItem title="Last Updated" description={new Date(salesInvoiceDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
       </section>}
 

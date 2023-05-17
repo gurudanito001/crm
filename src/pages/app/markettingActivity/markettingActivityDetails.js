@@ -183,6 +183,8 @@ const MarkettingActivityDetails = () => {
                 {markettingActivityQuery?.data?.pictures.map(image => <img key={image} src={image} className="m-2" alt="Product" width="200px" />)}
               </figure>
             </div>
+            <MarkettingActivityDetailListItem title="Date Created" description={new Date(markettingActivityQuery.data.createdAt).toLocaleString()  || "----"} />
+            <MarkettingActivityDetailListItem title="Last Updated" description={new Date(markettingActivityQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
 
 

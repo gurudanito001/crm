@@ -11,7 +11,7 @@ import { setMessage } from '../../../store/slices/notificationMessagesSlice';
 import { getUserData } from '../../../services/localStorageService';
 
 
-const PfiRequestListItem = ({id,companyName, contactPerson, productBrand, vehicleModel, quantity}) =>{
+const PfiRequestListItem = ({id, companyName, contactPerson, quantity, vehicles, approved}) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/pfiRequest/${id}`)}>
@@ -20,11 +20,12 @@ const PfiRequestListItem = ({id,companyName, contactPerson, productBrand, vehicl
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{companyName}</span>
           <span>{contactPerson}</span>
-          <span>{productBrand} - {vehicleModel}</span>
+          <span>{vehicles}</span>
         </article>
       </div>
-      <div className='w-25 d-flex align-items-center'>
-        <span className='small fw-bold ms-auto'>{quantity} units</span>
+      <div className='w-25 d-flex flex-column align-items-center'>
+        <span className='small fw-bold ms-auto mt-auto'>{quantity} vehicle brand(s)</span>
+        <span className={`small fw-bold ms-auto mb-auto ${approved ? "text-success" : "text-danger"}`}>{approved ? "Approved" : "Not Approved"}</span>
       </div>
     </li>
   )
@@ -52,6 +53,18 @@ const AllPfiRequestsEmployee = () => {
     })
   })
 
+  const listPfiVehicles = (list) =>{
+    let vehicles = '';
+    list.forEach( item =>{
+      if(vehicles === ''){
+        vehicles += `${item.productBrand}`
+      }else{
+        vehicles += ` | ${item.productBrand}`
+      }
+    })
+    return vehicles
+  }
+
   const listPfiRequests = () =>{
     if(pfiRequestQuery.data?.length > 0){
       return pfiRequestQuery.data.map( item => <PfiRequestListItem 
@@ -59,9 +72,9 @@ const AllPfiRequestsEmployee = () => {
         id={item.id}
         companyName={item.companyName}
         contactPerson={item.contactPerson}
-        productBrand={item.productBrand}
-        vehicleModel={item.vehicleModel}
+        vehicles={listPfiVehicles(item.pfiVehiclesData)}
         quantity={item.quantity}
+        approved={item.approved}
       />)
     }
   }

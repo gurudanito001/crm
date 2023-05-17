@@ -87,7 +87,7 @@ const CustomerVisitDetails = () => {
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>Customer Visit Details</h3>
-          { staffCadre !== "Administrator" &&
+          { getUserData().id === customerVisitDetailsQuery?.data?.employeeId && 
             <div className="btn-group">
             <button className="btn btn-sm border-secondary rounded" disabled={customerVisitDetailsQuery.isLoading} type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i className="bi bi-three-dots-vertical fs-5"></i>
@@ -106,14 +106,18 @@ const CustomerVisitDetails = () => {
 
         { !customerVisitDetailsQuery.isLoading &&
         <ul className='mt-5'>
+          <h6 className='small fw-bold'>Customer Visit Info</h6>
           <CustomerVisitDetailListItem title="Company Name" description={customerVisitDetailsQuery.data.companyName}/>
           <CustomerVisitDetailListItem title="Contact Person" description={customerVisitDetailsQuery.data.personToVisitName}/>
           <CustomerVisitDetailListItem title="Meeting Date" description={new Date(customerVisitDetailsQuery.data.meetingDate).toDateString()}/>
           <CustomerVisitDetailListItem title="Meeting Time" description={customerVisitDetailsQuery.data.meetingTime}/>
           <CustomerVisitDetailListItem title="Meeting Purpose" description={customerVisitDetailsQuery.data.meetingPurpose}/>
           <CustomerVisitDetailListItem title="Meeting Venue" description={customerVisitDetailsQuery.data.meetingVenue}/>
-
+          <CustomerVisitDetailListItem title="Visit Schedule Date Created" description={new Date(customerVisitDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+          <CustomerVisitDetailListItem title="Visit Schedule Last Updated" description={new Date(customerVisitDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
+          
           {Object.keys(visitReport).length > 0 && <>
+            <h6 className='small fw-bold mt-5'>After Customer Visit Info</h6>
             <CustomerVisitDetailListItem title="Call Type" description={visitReport.callType.toUpperCase()}/>
             <CustomerVisitDetailListItem title="Duration Of Meeting" description={convertMinutes(visitReport.durationOfMeeting)}/>
             <CustomerVisitDetailListItem title="Meeting Outcome" description={visitReport.meetingOutcome}/>
@@ -121,6 +125,8 @@ const CustomerVisitDetails = () => {
             <CustomerVisitDetailListItem title="Products Discussed" description={listProductsDiscussed(visitReport.productsDiscussed)}/>
             <CustomerVisitDetailListItem title="Quantity" description={visitReport.quantity}/>
             <CustomerVisitDetailListItem title="Status" description={visitReport.status}/>
+            <CustomerVisitDetailListItem title="Visit Report Date Created" description={new Date(visitReport.createdAt).toLocaleString()  || "----"} />
+            <CustomerVisitDetailListItem title="Visit Report Last Updated" description={new Date(visitReport.updatedAt).toLocaleString()  || "----"} />
           </>}
         </ul>}
       </section>}

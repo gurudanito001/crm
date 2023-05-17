@@ -94,6 +94,8 @@ const ContactPersonDetails = () => {
           <ContactPersonDetailListItem title="Role" description={contactPersonDetailsQuery.data.role || "----"} />
           <ContactPersonDetailListItem title="Phone Number 1" description={contactPersonDetailsQuery.data.phoneNumber1 || "----"} />
           <ContactPersonDetailListItem title="Phone Number 2" description={contactPersonDetailsQuery.data.phoneNumber2 || "----"} />
+          <ContactPersonDetailListItem title="Date Created" description={new Date(contactPersonDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+          <ContactPersonDetailListItem title="Last Updated" description={new Date(contactPersonDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
         </ul>}
       </section>}
 

@@ -141,6 +141,8 @@ const CompanyDetails = (props) => {
           <CompanyDetailListItem title="Company Code" description={companyDetailsQuery.data.code} />
           <CompanyDetailListItem title="Company Email" description={companyDetailsQuery.data.email} />
           <CompanyDetailListItem title="Company Brands" description={listCompanyBrands()} />
+          <CompanyDetailListItem title="Date Created" description={new Date(companyDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+          <CompanyDetailListItem title="Last Updated" description={new Date(companyDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
         </ul>}
 
         {branchQuery?.data?.length > 0  && <>

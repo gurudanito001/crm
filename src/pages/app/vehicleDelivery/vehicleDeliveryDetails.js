@@ -88,6 +88,8 @@ const VehicleDeliveryDetails = () => {
             <VehicleDeliveryDetailListItem title="Vehicle Recipient Phone" description={vehicleDeliveryDetailsQuery.data.vehicleRecipientPhone} />
             <VehicleDeliveryDetailListItem title="Reciever Relationship with Buyer" description={vehicleDeliveryDetailsQuery.data.receiverRelationshipWithBuyer} />
             <VehicleDeliveryDetailListItem title="Additional Information" description={vehicleDeliveryDetailsQuery.data.additionalInformation} />
+            <VehicleDeliveryDetailListItem title="Date Created" description={new Date(vehicleDeliveryDetailsQuery.data.createdAt).toLocaleString()  || "----"} />
+            <VehicleDeliveryDetailListItem title="Last Updated" description={new Date(vehicleDeliveryDetailsQuery.data.updatedAt).toLocaleString()  || "----"} />
           </ul>}
       </section>}
 

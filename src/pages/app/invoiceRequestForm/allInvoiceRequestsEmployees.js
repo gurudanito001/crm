@@ -12,7 +12,7 @@ import { getUserData } from '../../../services/localStorageService';
 
 
 
-const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, vehicleModel, quantity  }) =>{
+const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicles, quantity, approved  }) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/invoiceRequest/${id}`)}>
@@ -21,11 +21,12 @@ const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, v
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{invoiceName}</span>
           <span>{contactPerson}</span>
-          <span>{vehicleBrand} - {vehicleModel}</span>
+          <span>{vehicles}</span>
         </article>
       </div>
-      <div className='w-25 d-flex align-items-center'>
-        <span className='small fw-bold ms-auto'>{quantity} units</span>
+      <div className='w-25 d-flex flex-column align-items-center'>
+        <span className='small fw-bold ms-auto'>{quantity} vehicle brand(s)</span>
+        <span className={`small fw-bold ms-auto ${approved ? "text-success" : "text-danger"}`}>{approved ? "Approved" : "Not Approved"}</span>
       </div>
     </li>
   )
@@ -58,11 +59,23 @@ const AllInvoiceRequestsEmployees = () => {
         id={item.id}
         invoiceName={item.invoiceName}
         contactPerson={item.contactPerson}
-        vehicleBrand={item.vehicleBrand}
-        vehicleModel={item.vehicleModel}
-        quantity={item.quantity}
+        vehicles={listInvoiceVehicles(item.vehiclesData)}
+        quantity={item.vehiclesData.length}
       />)
     }
+  }
+
+  const listInvoiceVehicles = (list) =>{
+    console.log(list)
+    let vehicles = '';
+    list.forEach( item =>{
+      if(vehicles === ''){
+        vehicles += `${item.vehicleBrand}`
+      }else{
+        vehicles += ` | ${item.vehicleBrand}`
+      }
+    })
+    return vehicles
   }
 
 
