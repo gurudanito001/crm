@@ -61,6 +61,7 @@ const AllInvoiceRequestsEmployees = () => {
         contactPerson={item.contactPerson}
         vehicles={listInvoiceVehicles(item.vehiclesData)}
         quantity={item.vehiclesData.length}
+        approved={item.approved}
       />)
     }
   }

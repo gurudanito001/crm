@@ -71,6 +71,7 @@ const AllCustomerVisitsEmployee = () => {
           meetingDate={new Date(customerVisit.meetingDate).toDateString()}
           meetingTime={customerVisit.meetingTime}
           meetingVenue={customerVisit.meetingVenue}
+          completedVisit={Boolean(customerVisit.visitReportId)}
         />
       )
     }

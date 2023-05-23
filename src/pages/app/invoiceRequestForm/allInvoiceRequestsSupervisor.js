@@ -12,7 +12,7 @@ import { getUserData } from '../../../services/localStorageService';
 
 
 
-const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, vehicleModel, quantity  }) =>{
+const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicles, quantity, approved  }) =>{
   const navigate = useNavigate()
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/invoiceRequest/${id}`)}>
@@ -21,11 +21,12 @@ const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, v
         <article className='d-flex flex-column'>
           <span className='h6 fw-bold'>{invoiceName}</span>
           <span>{contactPerson}</span>
-          <span>{vehicleBrand} - {vehicleModel}</span>
+          <span>{vehicles}</span>
         </article>
       </div>
-      <div className='w-25 d-flex align-items-center'>
-        <span className='small fw-bold ms-auto'>{quantity} units</span>
+      <div className='w-25 d-flex flex-column align-items-center'>
+        <span className='small fw-bold ms-auto mt-auto'>{quantity} vehicle brand(s)</span>
+        <span className={`small fw-bold ms-auto mb-auto ${approved ? "text-success" : "text-danger"}`}>{approved ? "Approved" : "Not Approved"}</span>
       </div>
     </li>
   )
@@ -35,7 +36,7 @@ const InvoiceRequestListItem = ({id, invoiceName, contactPerson, vehicleBrand, v
 const AllInvoiceRequestsSupervisor = () => {
   const dispatch = useDispatch();
   const {staffCadre, id} = getUserData();
-  const [employeeId, setEmployeeId] = useState("");
+  const [employeeId, setEmployeeId] = useState(id);
   const navigate = useNavigate();
 
 
@@ -103,6 +104,19 @@ const AllInvoiceRequestsSupervisor = () => {
     return data;
   }
 
+  const listInvoiceVehicles = (list) =>{
+    console.log(list)
+    let vehicles = '';
+    list.forEach( item =>{
+      if(vehicles === ''){
+        vehicles += `${item.vehicleBrand}`
+      }else{
+        vehicles += ` | ${item.vehicleBrand}`
+      }
+    })
+    return vehicles
+  }
+
   const listSortedInvoiceRequests = () =>{
     let sortedInvoiceRequests = sortInvoiceRequests();
 
@@ -121,9 +135,9 @@ const AllInvoiceRequestsSupervisor = () => {
               id={item.id}
               invoiceName={item.invoiceName}
               contactPerson={item.contactPerson}
-              vehicleBrand={item.vehicleBrand}
-              vehicleModel={item.vehicleModel}
-              quantity={item.quantity}
+              vehicles={listInvoiceVehicles(item.vehiclesData)}
+              quantity={item.vehiclesData.length}
+              approved={item.approved}
             />
           )
         })}
@@ -163,7 +177,7 @@ const AllInvoiceRequestsSupervisor = () => {
             </ul>
           </div>
         </header>
-        <p>All Invoice Requests are listed below</p>
+        <p>All Invoice Requests for <strong>{getEmployeeData(employeeId).fullName}</strong> listed below</p>
 
         {invoiceRequestQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Invoice Requests <Spinner />

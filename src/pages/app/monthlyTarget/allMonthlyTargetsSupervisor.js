@@ -1,6 +1,6 @@
 
 import '../../../styles/auth.styles.css';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "../../../components/layout";
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
@@ -31,14 +31,15 @@ const MonthlyTargetListItem = ({id, month, numOfProductTargets}) =>{
 }
 
 
-const AllMonthlyTargetsEmployees = () => {
+const AllMonthlyTargetsSupervisor = () => {
   const dispatch = useDispatch();
   let {id} = getUserData();
   const [currentTab, setCurrentTab] = useState("approved")
+  const [employeeId, setEmployeeId] = useState(id);
 
   const monthlyTargetQuery = useQuery({
     queryKey: ["allMonthlyTargets"],
-    queryFn: () => apiGet({url: `/monthlyTarget/employee/${id}`})
+    queryFn: () => apiGet({url: `/monthlyTarget/employee/${employeeId}`})
     .then( (res) => res.payload)
     .catch( error =>{
       dispatch(
@@ -50,6 +51,32 @@ const AllMonthlyTargetsEmployees = () => {
       );
     })
   })
+
+  const subordinatesQuery = useQuery({
+    queryKey: ["allSubordinates"],
+    queryFn: () => apiGet({url: `/employee/subordinates/${id}`})
+    .then( (res) => {
+      console.log("subordinates", res.payload)
+      return res.payload
+    })
+    .catch( error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
+  })
+
+  const listSubordinates = () =>{
+    if(subordinatesQuery.data.length > 0){
+      return subordinatesQuery.data.map(subordinate =>
+        <option key={subordinate.id} value={subordinate.id}>{`${subordinate.firstName} ${subordinate.lastName}`}</option>
+      )
+    }
+  }
 
   const listAllMonthlyTargets = (type, length = false) =>{
 
@@ -65,14 +92,53 @@ const AllMonthlyTargetsEmployees = () => {
     }
   }
 
+  const getEmployeeData = (id) =>{
+    let data = {};
+    if(subordinatesQuery.data?.length){
+      subordinatesQuery.data.forEach( item => {
+        if(item.id === id){
+          data = {id: item.id, fullName: `${item.firstName} ${item.lastName}`, email: item.email}
+        }
+      })
+    }
+    return data;
+  }
+
+  const handleChangeSubordinate = (e) =>{
+    e.preventDefault();
+    setEmployeeId(e.target.value);
+    
+  }
+
+  useEffect(()=>{
+    if(employeeId){
+      monthlyTargetQuery.refetch()
+    }
+    
+  }, [employeeId])
+
   return (
     <Layout>
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Monthly Targets</h3>
+          <div className="btn-group me-2">
+            <button className="btn btn-sm border-secondary rounded" type="button" disabled={monthlyTargetQuery.isLoading} data-bs-toggle="dropdown" aria-expanded="false">
+              { monthlyTargetQuery.isFetching ? <Spinner /> : <i className="bi bi-filter fs-5"></i>} 
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end p-3">
+              <div className=""> 
+                <label htmlFor="subordinates" className="form-label small fw-bold">Filter by Employees</label>
+                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeSubordinate} aria-label="Default select example">
+                  <option value={id}>{`${getUserData().firstName} ${getUserData().lastName}`}</option>
+                  {!subordinatesQuery.isLoading && listSubordinates()}
+                </select>
+              </div>
+            </ul>
+          </div>
           <a href='/app/targetAchievements/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
-        <p>All your Monthly Targets are listed below</p>
+        <p>All your Monthly Targets for <strong>{getEmployeeData(employeeId).fullName}</strong> listed below</p>
 
         {monthlyTargetQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Monthly Targets <Spinner />
@@ -91,4 +157,4 @@ const AllMonthlyTargetsEmployees = () => {
   )
 }
 
-export default AllMonthlyTargetsEmployees;
+export default AllMonthlyTargetsSupervisor;

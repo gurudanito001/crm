@@ -1,6 +1,6 @@
 
 import '../../../styles/auth.styles.css';
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import Layout from "../../../components/layout";
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../../services/apiService';
@@ -33,10 +33,19 @@ const CustomerListItem = ({id, companyName, address1, address2, industry}) =>{
 const AllCustomersAdmin = () => {
   const dispatch = useDispatch();
   const [currentTab, setCurrentTab] = useState("approved");
+  const [employeeId, setEmployeeId] = useState("");
+
+  const deriveUrl = () =>{
+    if(employeeId){
+      return `/customer/employee/${employeeId}`
+    }else{
+      return "/customer"
+    }
+  }
 
   const customerQuery = useQuery({
     queryKey: ["allCustomers"],
-    queryFn: () => apiGet({url: "/customer"})
+    queryFn: () => apiGet({url: deriveUrl()})
     .then( (res) => res.payload)
     .catch( error =>{
       dispatch(
@@ -63,6 +72,14 @@ const AllCustomersAdmin = () => {
       );
     })
   })
+
+  const listEmployees = () =>{
+    if(employeeQuery.data.length > 0){
+      return employeeQuery.data.map(employee =>
+        <option key={employee.id} value={employee.id}>{`${employee.firstName} ${employee.lastName}`}</option>
+      )
+    }
+  }
 
   const sortCustomers = (type) =>{
     let data = returnListOfCustomers(type);
@@ -136,11 +153,35 @@ const AllCustomersAdmin = () => {
     })
   }
 
+  const handleChangeEmployees = (e) =>{
+    e.preventDefault();
+    setEmployeeId(e.target.value);
+  }
+
+  useEffect(()=>{
+    customerQuery.refetch()
+  }, [employeeId])
+
   return (
     <Layout>
       <section className="px-3 py-5 p-lg-5" style={{ maxWidth: "700px" }}>
         <header className="d-flex align-items-center">
           <h3 className='fw-bold me-auto'>All Customers</h3>
+
+          <div className="btn-group me-2">
+            <button className="btn btn-sm border-secondary rounded" type="button" disabled={customerQuery.isLoading} data-bs-toggle="dropdown" aria-expanded="false">
+              { customerQuery.isFetching ? <Spinner /> : <i className="bi bi-filter fs-5"></i>} 
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end p-3">
+              <div className=""> 
+                <label htmlFor="subordinates" className="form-label small fw-bold">Filter by Employees</label>
+                <select className="form-select shadow-none" style={{minWidth: "300px"}} id="subordinates" value={employeeId} onChange={handleChangeEmployees} aria-label="Default select example">
+                  <option value="">View All</option>
+                  {!employeeQuery.isLoading && listEmployees()}
+                </select>
+              </div>
+            </ul>
+          </div>
         </header>
         <p>All customers are listed below</p>
 

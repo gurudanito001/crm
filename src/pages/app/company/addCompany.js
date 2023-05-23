@@ -182,7 +182,7 @@ const AddCompany = () => {
   const handleSubmit = (e) =>{
     e.preventDefault();
     //return console.log(formData);
-    let errors = formValidator(["group", "code", "name", "logo", "email", "address", "brands"], formData);
+    let errors = formValidator(["group", "code", "name", "logo", "email", "address"], formData);
     if(Object.keys(errors).length > 0){
       dispatch(
         setMessage({

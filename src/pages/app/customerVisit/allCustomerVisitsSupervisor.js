@@ -38,6 +38,7 @@ const AllCustomerVisitsSupervisor = () => {
   const {id} = getUserData();
   const [employeeId, setEmployeeId] = useState(id);
   const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState("scheduled");
   
   const customerVisitQuery = useQuery({
     queryKey: ["allCustomerVisits"],
@@ -57,7 +58,10 @@ const AllCustomerVisitsSupervisor = () => {
   const subordinatesQuery = useQuery({
     queryKey: ["allSubordinates"],
     queryFn: () => apiGet({url: `/employee/subordinates/${id}`})
-    .then( (res) => res.payload)
+    .then( (res) => {
+      console.log("subordinates", res.payload)
+      return res.payload
+    })
     .catch( error =>{
       dispatch(
         setMessage({
@@ -105,6 +109,28 @@ const AllCustomerVisitsSupervisor = () => {
   }
 
   const listSortedCustomerVisits = () =>{
+    if(employeeId === id){
+      if(customerVisitQuery?.data?.length){
+        let list;
+        if(currentTab === "scheduled"){
+          list = customerVisitQuery.data.filter( data =>  data.visitReportId === null)
+        }else if(currentTab === "reported"){
+          list = customerVisitQuery.data.filter( data =>  data.visitReportId !== null)
+        }
+        return list.map(customerVisit =>
+          <CustomerVisitListItem 
+            id={customerVisit.id}
+            key={customerVisit.id}
+            companyName={customerVisit.companyName}
+            personToVisitName={customerVisit.personToVisitName}
+            meetingDate={new Date(customerVisit.meetingDate).toDateString()}
+            meetingTime={customerVisit.meetingTime}
+            meetingVenue={customerVisit.meetingVenue}
+            completedVisit={Boolean(customerVisit.visitReportId)}
+          />
+        )
+      }
+    }
     let sortedCustomerVisits = sortCustomerVisits();
 
     let keys = Object.keys(sortedCustomerVisits);
@@ -177,7 +203,18 @@ const AllCustomerVisitsSupervisor = () => {
             </ul>
           </div>
         </header>
-        <p>All customer visits are listed below</p>
+        <p>All customer visits for <strong>{getEmployeeData(employeeId).fullName}</strong> are listed below</p>
+        {employeeId === id && 
+          <ul className="nav nav-tabs mt-4">
+            <li className="nav-item me-3">
+              <button className={`nav-link py-3 px-4 text-dark ${currentTab === "scheduled" && " border border-bottom-0 fw-bold"} `} onClick={() => setCurrentTab("scheduled")}>Scheduled Visits</button>
+            </li>
+            <li className="nav-item">
+              <button className={`nav-link py-3 px-4 text-dark ${currentTab === "reported" && "border border-bottom-0 fw-bold"} `} onClick={() => setCurrentTab("reported")}>Completed Visits</button>
+            </li>
+          </ul>
+        }
+        
 
         {customerVisitQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Customer Visits <Spinner />

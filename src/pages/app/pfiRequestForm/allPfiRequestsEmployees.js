@@ -73,7 +73,7 @@ const AllPfiRequestsEmployee = () => {
         companyName={item.companyName}
         contactPerson={item.contactPerson}
         vehicles={listPfiVehicles(item.pfiVehiclesData)}
-        quantity={item.quantity}
+        quantity={item.pfiVehiclesData.length}
         approved={item.approved}
       />)
     }

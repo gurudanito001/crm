@@ -24,6 +24,8 @@ const AddMonthlyTarget = () => {
     planForMonth: "",
   })
 
+  const queryClient = useQueryClient();
+
   useEffect(()=>{
     setFormData( prevState => ({
       ...prevState,
@@ -56,6 +58,28 @@ const AddMonthlyTarget = () => {
       );
     })
   }
+  })
+
+  const productMutation = useMutation({
+    mutationFn: (data)=> apiPost({ url: `/product/create`, data }).then(res => {
+      dispatch(
+        setMessage({
+          severity: "success",
+          message: res.message,
+          key: Date.now(),
+        })
+      );
+      queryClient.invalidateQueries(["allProducts"])
+      navigate("/app/product")
+    }).catch(error =>{
+      dispatch(
+        setMessage({
+          severity: "error",
+          message: error.message,
+          key: Date.now(),
+        })
+      );
+    })
   })
 
   const productQuery = useQuery({

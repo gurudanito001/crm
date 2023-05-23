@@ -182,7 +182,7 @@ const EditCompanyDetails = ({ data, handleCancel }) => {
 
   const handleSubmit = (e) =>{
     e.preventDefault();
-    let errors = formValidator(["group", "code", "name", "logo", "email", "brands"], formData);
+    let errors = formValidator(["group", "code", "name", "logo", "email"], formData);
     if(Object.keys(errors).length > 0){
       console.log(errors)
       dispatch(

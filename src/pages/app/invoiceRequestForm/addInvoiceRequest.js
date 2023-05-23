@@ -607,6 +607,16 @@ const AddInvoiceRequest = () => {
 
 
           <div className="mb-3">
+            <label htmlFor="rebateReceiver" className="form-label">Rebate Reciever</label>
+            <input type="text" className="form-control shadow-none" value={formData.rebateReceiver} onChange={handleChange("rebateReceiver")} id="rebateReceiver" placeholder="Rebate Reciever" />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="relationshipWithTransaction" className="form-label">Relationship With Transaction</label>
+            <input type="text" className="form-control shadow-none" value={formData.relationshipWithTransaction} onChange={handleChange("relationshipWithTransaction")} id="relationshipWithTransaction" placeholder="Relationship With Transaction" />
+          </div>
+
+          <div className="mb-3">
             <label htmlFor="deliveryDate" className="form-label">Expected Delivery Date (<span className='fst-italic text-warning'>required</span>)</label>
             <input type="date" className="form-control shadow-none" value={formData.expectedDeliveryDate} onChange={handleChange("expectedDeliveryDate")} id="deliveryDate" />
             <span className='text-danger font-monospace small'>{errors.expectedDeliveryDate}</span>
@@ -655,15 +665,6 @@ const AddInvoiceRequest = () => {
             <input type="text" className="form-control shadow-none" value={formData.agreedCreditPeriod} onChange={handleChange("agreedCreditPeriod")} id="agreedCreditPeriod" placeholder="Agreed Credit Period" />
           </div>
 
-          <div className="mb-3">
-            <label htmlFor="rebateReceiver" className="form-label">Rebate Reciever</label>
-            <input type="text" className="form-control shadow-none" value={formData.rebateReceiver} onChange={handleChange("rebateReceiver")} id="rebateReceiver" placeholder="Rebate Reciever" />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="relationshipWithTransaction" className="form-label">Relationship With Transaction</label>
-            <input type="text" className="form-control shadow-none" value={formData.relationshipWithTransaction} onChange={handleChange("relationshipWithTransaction")} id="relationshipWithTransaction" placeholder="Relationship With Transaction" />
-          </div>
           <div className="mb-3">
             <label htmlFor="accountDetailsToTransfer" className="form-label">Account Details To Transfer</label>
             <textarea className="form-control shadow-none" value={formData.accountDetailsToTransfer} onChange={handleChange("accountDetailsToTransfer")} id="accountDetailsToTransfer" rows={3}></textarea>

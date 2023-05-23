@@ -16,7 +16,7 @@ const MonthlyTargetListItem = ({id, month, numOfProductTargets}) =>{
   return(
     <li className='d-flex border-bottom py-3 listItem' onClick={()=>navigate(`/app/targetAchievements/${id}`)}>
       <div className='w-75 d-flex align-items-center pe-2'>
-        <span className='bgPurple p-3 me-3'><i className="bi bi-cash text-white fs-5"></i></span>
+        <span className='bgPurple p-3 me-3'><i className="bi bi-bullseye text-white fs-5"></i></span>
         <article>
           <span className='h6 fw-bold'> Targets and Achievement for {month}</span> <br />
           <span>{numOfProductTargets} product target(s)</span>
