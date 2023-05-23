@@ -138,7 +138,7 @@ const AllMonthlyTargetsSupervisor = () => {
           </div>
           <a href='/app/targetAchievements/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
-        <p>All your Monthly Targets for <strong>{getEmployeeData(employeeId).fullName}</strong> listed below</p>
+        <p>All {employeeId === id ? "your Monthly Targets" : `Monthly Targets for ${getEmployeeData(employeeId).fullName}`} are listed below</p>
 
         {monthlyTargetQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Monthly Targets <Spinner />

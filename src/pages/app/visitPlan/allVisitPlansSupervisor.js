@@ -217,7 +217,7 @@ const AllVisitPlansSupervisor = () => {
             </ul>
           </div>
         </header>
-        <p>All Visit Plans for <strong>{getEmployeeData(employeeId).fullName}</strong> listed below</p>
+        <p>All {employeeId === id ? "your Visit Plans" : `Visit Plans for ${getEmployeeData(employeeId).fullName}`} are listed below</p>
 
         <ul className="nav nav-tabs mt-4">
           <li className="nav-item me-3">

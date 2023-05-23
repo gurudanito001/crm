@@ -176,8 +176,9 @@ const AllInvoiceRequestsSupervisor = () => {
               </div>
             </ul>
           </div>
+          <a href='/app/invoiceRequest/add' className='btn btnPurple d-flex align-items-center mx-0 px-3 me-2'><i className="bi bi-plus"></i>Add </a>
         </header>
-        <p>All Invoice Requests for <strong>{getEmployeeData(employeeId).fullName}</strong> listed below</p>
+        <p>All {employeeId === id ? "your Invoice Requests" : `Invoice Requests for ${getEmployeeData(employeeId).fullName}`} are listed below</p>
 
         {invoiceRequestQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Invoice Requests <Spinner />
@@ -193,7 +194,6 @@ const AllInvoiceRequestsSupervisor = () => {
         </ul>
       </section>
     </Layout>
-
   )
 }
 

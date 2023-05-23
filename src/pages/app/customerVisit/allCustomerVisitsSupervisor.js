@@ -162,7 +162,6 @@ const AllCustomerVisitsSupervisor = () => {
   const handleChangeSubordinate = (e) =>{
     e.preventDefault();
     setEmployeeId(e.target.value);
-    
   }
 
   useEffect(()=>{
@@ -203,7 +202,7 @@ const AllCustomerVisitsSupervisor = () => {
             </ul>
           </div>
         </header>
-        <p>All customer visits for <strong>{getEmployeeData(employeeId).fullName}</strong> are listed below</p>
+        <p>All {employeeId === id ? "your customer visits" : `customer visits for ${getEmployeeData(employeeId).fullName}`}   are listed below</p>
         {employeeId === id && 
           <ul className="nav nav-tabs mt-4">
             <li className="nav-item me-3">
@@ -214,7 +213,6 @@ const AllCustomerVisitsSupervisor = () => {
             </li>
           </ul>
         }
-        
 
         {customerVisitQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching Customer Visits <Spinner />

@@ -154,7 +154,7 @@ const AllPfiRequestsSupervisor = () => {
           </div>
           <a href='/app/pfiRequest/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
-        <p>All PFI Requests for <strong>{getEmployeeData(employeeId).fullName}</strong> are listed below</p>
+        <p>All {employeeId === id ? "your PFI Requests" : `PFI Requests for ${getEmployeeData(employeeId).fullName}`} are listed below</p>
 
         {pfiRequestQuery.isLoading && <div className='mt-5 text-center h5 fw-bold text-secondary'>
             Fetching PFI Requests <Spinner />

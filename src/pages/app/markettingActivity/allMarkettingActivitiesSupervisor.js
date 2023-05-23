@@ -156,7 +156,7 @@ const AllMarkettingActivitiesSupervisor = () => {
           </div>
           <a href='/app/markettingActivity/add' className='btn btnPurple d-flex align-items-center mx-0 px-3'><i className="bi bi-plus"></i>Add </a>
         </header>
-        <p>All Marketing Activities for <strong>{getEmployeeData(employeeId).fullName}</strong> listed below</p>
+        <p>All {employeeId === id ? "your Marketing Activities" : `Marketing Activities for ${getEmployeeData(employeeId).fullName}`} are listed below</p>
 
         <ul className="nav nav-tabs mt-4">
           <li className="nav-item me-3">
